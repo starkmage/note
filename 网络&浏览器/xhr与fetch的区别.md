@@ -13,6 +13,16 @@
 1. 使用起来也比较繁琐，需要设置很多值。
 2. 早期的IE浏览器有自己的实现，这样需要写兼容代码。
 
+readyState 的 5 个值的含义：
+
+| 状态值 | 描述                                                         |
+| ------ | ------------------------------------------------------------ |
+| 0      | 初始化状态。XMLHttpRequest 对象已创建或已被 abort() 方法重置。 |
+| 1      | open() 方法已调用，但是 send() 方法未调用。请求还没有被发送。 |
+| 2      | Send() 方法已调用，HTTP 请求已发送到 Web 服务器。未接收到响应。 |
+| 3      | 所有响应头部都已经接收到。响应体开始接收但未完成。           |
+| 4      | HTTP 响应已经完全接收。                                      |
+
 在手写里我也分别用原生和Promise封装过 Ajax，可去参考
 
 ## jQuery的Ajax
@@ -50,8 +60,8 @@ axios({
     method: 'post',
     url: '/user/12345',
     data: {
-      firstName: 'liu',
-      lastName: 'weiqin'
+      firstName: 'z',
+      lastName: 's'
     }
   })
   .then(res => console.log(res))
@@ -73,7 +83,19 @@ axios({
 
 1. 只持现代代浏览器
 
-**原理是什么？**待查
+**原理是什么？**
+
+**其核心只有两点：**
+
+**1、request方法，**Axios外部方法其实都是在调用这一个方法
+
+**2、方法内部创建一个Promise链式调用，**常用的功能，拦截器，数据修改器，http请求，就是在这个Promise链式调用中逐步被执行。**request**方法返回Promise链。我们用的就是这个返回的Promise，执行结果就在这个Promise中的状态值中。
+
+参考文章：
+
+[Axios基本原理深度解析](https://juejin.im/post/6844904199302430733#heading-0)
+
+[axios执行原理了解一下！](https://juejin.im/post/6844903685068161038#heading-1)
 
 ## fetch
 
@@ -107,7 +129,7 @@ fetch('/users.json', {
 
 1. `fetch`只对网络请求报错，对`400`，`500`都当做成功的请求，需要封装去处理。
 2. `fetch`默认不会带`cookie`，需要添加配置项。
-3. `fetch`不支持`abort`，不支持超时控制，使用`setTimeout`及`Promise.reject`的实现超时控制并不能阻止请求过程继续在后台运行，造成了流量的浪费。
+3. `fetch`不支持`abort`（终止），不支持超时控制，使用`setTimeout`及`Promise.reject`的实现超时控制并不能阻止请求过程继续在后台运行，造成了流量的浪费。
 4. `fetch`没有办法原生监测请求的进度，而`XHR`可以。
 
 **`fetch`规范与`jQuery.ajax()`主要有两种方式的不同，牢记：**

@@ -448,6 +448,12 @@ https://zhuanlan.zhihu.com/p/37429159
 
 https://www.cnblogs.com/qiuzhimutou/p/7592875.html
 
+### 多线程打包
+
+webpack打包过程中也是单线程的，特别是在执行loader的时候，长时间编译的任务很多，这样就会导致等待的情况。
+
+**HappyPack**可以将loader的同步执行转换为并行的，这样就能充分利用系统资源来加快打包效率了。
+
 ## Vue-cli3的 webpack 配置
 
 vue-cli升级到3.x版本之后，构建出来的项目比较简练，但是没有了webpack的显式配置，如果想要脚手架适用自己的项目，就需要配置`vue.config.js`文件。

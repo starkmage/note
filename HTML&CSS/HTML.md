@@ -229,3 +229,65 @@ src是source的简写，目的是要把文件下载到html页面中去。
 * 最适合带有大型渲染区域的应用程序（比如谷歌地图）
 * 不适合游戏应用
 
+## WebWorker
+
+Web Worker 是HTML5标准的一部分，这一规范定义了一套 API，它允许一段 JavaScript 程序运行在主线程之外的另外一个线程中。 web worker 在后台运行，独立于其他脚本，不会影响页面的性能。
+
+值得注意的是， Web Worker 规范中定义了两类工作线程，分别是专用线程Dedicated Worker和共享线程 Shared Worker，其中，Dedicated Worker只能为一个页面所使用，而Shared Worker则可以被多个页面所共享。
+
+所有主流浏览器均支持 web worker，除了 Internet Explorer。
+
+简单的使用方法：
+
+1. 创建 web worker 文件
+
+   创建一个计数脚本。该脚本存储于 "demo_workers.js" 文件中：
+
+   ```js
+   var i = 0;
+   
+   function timedCount() {
+     i = i + 1;
+     postMessage(i);
+     setTimeout("timedCount()", 500);
+   }
+   
+   timedCount();
+   ```
+
+   以上代码中重要的部分是 `postMessage`() 方法 - 它用于向 HTML 页面传回一段消息。
+
+2. 创建 Web Worker 对象
+
+   我们已经有了 web worker 文件，现在我们需要从 HTML 页面调用它。
+
+   下面的代码检测是否存在 worker，如果不存在，- 它会创建一个新的 web worker 对象，然后运行 "demo_workers.js" 中的代码：
+
+   ``` js
+   var w;
+   // 开始计时
+   function startWorker()
+   {
+     // 浏览器是否支持 Web Worker
+     if(typeof(Worker) !== "undefined") {
+       if(typeof(w) == "undefined") {
+         w = new Worker("demo_workers.js");
+       }
+       // 监听消息
+       w.onmessage = function (event) {
+         document.getElementById("result").innerHTML=event.data;
+       };
+     }
+     else {
+      document.getElementById("result").innerHTML = "您的浏览器不支持 Web Worker";
+     }
+   }
+   // 停止计时
+   function stopWorker() {
+     // 终止 Web Worker
+   	w.terminate();
+   }
+   ```
+
+   
+

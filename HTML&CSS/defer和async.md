@@ -86,9 +86,23 @@ load：当页面 DOM 结构中的所有资源都加载完成之后，包括 asyn
 
 ### 关于白屏时间
 
-- 首屏时间和 DomContentLoad 事件没有必然的先后关系
+- 首、白屏时间和 DomContentLoad 事件没有必然的先后关系，因为首屏图片加载完成才算首屏时间，所以与DOMContendLoad 不一定
+
 - 所有 CSS 尽早加载是减少首屏时间的最关键
+
 - script 标签放在 body 底部，做与不做 async 或者 defer 处理，都不会影响首屏时间，但影响DomContentLoad 和 load 的时间，进而影响依赖他们的代码的执行的开始时间
+
+- 白屏时间：从浏览器输入地址并回车后到页面开始有内容的时间；
+
+  - ```js
+    (window.chrome.loadTimes().firstPaintTime - window.chrome.loadTimes().startLoadTime)*1000
+    ```
+
+- 首屏时间：从浏览器输入地址并回车后到首屏内容渲染完毕的时间；
+
+- 用户可操作时间节点：domready触发节点，点击事件有反应；
+
+- 总下载时间：window.onload的触发节点。
 
 ### 关于阻塞
 

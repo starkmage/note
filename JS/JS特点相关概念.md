@@ -1,4 +1,4 @@
-### JS为什么是单线程
+## JS为什么是单线程
 
 这主要和 JS 的用途有关，JS 是作为浏览器的脚本语言，主要是实现用户与浏览器的交互，以及操作 DOM。这决定了它只能是单线程，否则会带来很复杂的同步问题。 
 
@@ -49,3 +49,179 @@ Node.js 中的异步 I/O 采用多线程的方式，由 `EventLoop`、`I/O 观�
 [nodejs 异步I/O和事件驱动](https://segmentfault.com/a/1190000005173218)
 
 Node.js 的事件驱动是基于 EventEmitter 的。
+
+## JS面向对象的三大特征
+
+* 封装
+
+  封装就是把抽象出来的数据和对数据的操作封装在一起，数据被保护在内部，程序的其它部分只有通过被授权的操作(成员方法)，才能对数据进行操作。
+
+   JS封装只有两种状态，一种是公开的，一种是私有的。
+
+  ``` js
+  function Person(name, age){
+    // 公开
+    this.name = name
+    // 私有
+    var age = age
+  }
+  var p1 = new Person('zs', 20)
+  ```
+
+* 继承
+
+  在ES5中，用的最多的就是组合继承和寄生组合继承，而ES6中则是extends
+
+* 多态
+
+  多态其实就是把做的内容和谁去做分开。同一操作作用于不同的对象，可以有不同的解释，产生不同的执行结果。
+
+  因为js是动态语言，多态性本身就有。
+
+  下面这个例子就说明了，一个动物能否实现叫声，只取决于makeSound，不针对某种类型的对象。
+
+  ``` js
+   var makeSound=function (animal) {
+     animal.sound();
+   }
+   var Duck=function () {
+   }
+   var Dog=function () {
+   }
+   Duck.prototype.sound=function () {
+     console.log("嘎嘎嘎")
+   }
+  Dog.prototype.sound=function () {
+    console.log("旺旺旺")
+  }
+  makeSound(new Duck());
+  makeSound(new Dog());
+  ```
+
+参考文章：
+
+[JavaScript面向对象的三大特征](https://segmentfault.com/a/1190000008321085)
+
+## JS 的严格模式
+
+进入"严格模式"的标志，是下面这行语句：
+
+``` js
+'use strict'
+```
+
+老版本的浏览器会把它当作一行普通字符串，加以忽略。
+
+* 针对整个脚本文件
+
+  将"use strict"放在脚本文件的第一行，则整个脚本都将以"严格模式"运行。如果这行语句不在第一行，则无效，整个脚本以"正常模式"运行。
+
+* 针对单个函数
+
+  将"use strict"放在函数体的第一行，则整个函数以"严格模式"运行。
+
+**ES6 的模块自动采用严格模式，不管你有没有在模块头部加上`"use strict"`**
+
+使用严格模式的一些限制：
+
+- 变量必须声明后再使用
+
+- 全局函数的 this 不再指向 Window，而是 undefined
+
+  ``` js
+  'use strict'
+  
+  console.log(this)	// Window
+  
+  function fn() {
+    console.log(this);
+  }
+  fn()	// undefined
+  
+  let fn2 = () => {
+    console.log(this);
+  }
+  fn2()	// Window
+  ```
+
+* 函数的参数不能有同名属性，对象不能有重名的属性，否则报错
+
+* 不能对只读属性赋值，否则报错
+
+* 无法删除变量。只有configurable设置为true的对象属性，才能被删除
+
+* 禁止使用arguments.callee
+
+* arguments不再追踪参数的变化
+
+  ``` js
+  function f(a) {
+    a = 2;
+    return [a, arguments[0]];
+  }
+  f(1); // 正常模式为[2,2]
+  
+  function f(a) {
+    "use strict";
+    a = 2;
+    return [a, arguments[0]];
+  }
+  f(1); // 严格模式为[2,1]
+  ```
+
+* 新增了一些保留字
+
+参考文章：
+
+[JavaScript 严格模式下this的几种指向](https://segmentfault.com/a/1190000010108912)
+
+[Javascript 严格模式详解](https://www.ruanyifeng.com/blog/2013/01/javascript_strict_mode.html)
+
+[ES6入门——Module 的语法](https://es6.ruanyifeng.com/#docs/module#%E6%A6%82%E8%BF%B0)
+
+## JS传值调用
+
+在传值调用中，传递给函数参数是函数被调用时所传实参的拷贝。在传值调用中实际参数被求值，其值被绑定到函数中对应的变量上（通常是把值复制到新内存区域）。
+
+在传引用调用调用中，传递给函数的是它的实际参数的隐式引用而不是实参的拷贝。通常函数能够修改这些参数（比如赋值），而且改变对于调用者是可见的。
+
+还有一种求值策略叫做传共享调用，传共享调用和传引用调用的不同之处是，该求值策略传递给函数的参数是对象的引用的拷贝，即对象变量指针的拷贝。
+
+对于 JS 来说：
+
+- **基本类型是传值调用**
+- **引用类型传共享调用**
+
+传值调用本质上传递的是变量的值的拷贝。
+
+传共享调用本质上是传递对象的指针的拷贝，其指针也是变量的值。所以传共享调用也可以说是传值调用。
+
+通过一个例子理解上面的内容：
+
+``` js
+var num = 10;
+var obj1 = {item: "unchanged"};
+var obj2 = {item: "unchanged"};
+
+function changeStuff(a, b, c) {
+  a = a * 10;
+	b.item = "changed";
+	c = {item: "changed"};
+}
+
+changeStuff(num, obj1, obj2);
+```
+
+<img src="https://raw.githubusercontent.com/nodejh/nodejh.github.io/master/images/Is-JavaScript-a-pass-by-reference-or-pass-by-value-language-3.png" style="zoom: 50%;" />
+
+<img src="https://raw.githubusercontent.com/nodejh/nodejh.github.io/master/images/Is-JavaScript-a-pass-by-reference-or-pass-by-value-language-4.png" style="zoom:50%;" />
+
+如图所示，变量 `a` 的值的改变，并不会影响变量 `num`。
+
+而 `b` 因为和 `obj1` 是指向同一个对象，所以使用 `b.item = "changed";` 修改对象的值，会造成 `obj1` 的值也随之改变。
+
+由于是对 `c` 重新赋值了，所以修改 `c` 的对象的值，并不会影响到 `obj2`。
+
+参考文章：
+
+[JavaScript 是传值调用还是传引用调用？](https://github.com/nodejh/nodejh.github.io/issues/32)

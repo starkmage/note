@@ -53,9 +53,19 @@ CSP，即浏览器中的内容安全策略，它的核心思想就是服务器�
 
 #### 3. 利用 HttpOnly
 
-很多 `XSS` 攻击脚本都是用来窃取 `Cookie`, 而设置 `Cookie` 的 `HttpOnly` 属性后，`JavaScript` 便无法读取 `Cookie` 的值。这样也能很好的防范 `XSS` 攻击。
+很多 `XSS` 攻击脚本都是用来窃取 `Cookie`, 而设置 `Cookie` 的 `HttpOnly` 属性后，`JavaScript` 便无法通过 `document.cookie`读取 `Cookie` 的值。这样也能很好的防范 `XSS` 攻击。
 
 在服务端的响应头中设置。
+
+``` js
+res.setHeader('Set-Cookie', 'test = zsjjj; HttpOnly')
+```
+
+如果要设置多个cookie，有些带有`HttpOnly`，有些不带。代码是：
+
+```js
+response.setHeader('Set-Cookie', ['foo=bar; HttpOnly', 'x=42; HttpOnly', 'y=88']);
+```
 
 ## CSRF
 
@@ -115,8 +125,6 @@ CSRF(Cross-site request forgery)，即**跨站请求伪造**，指的是黑客�
 2. 也就是上面列举的几种攻击方式，`a` 标签、`img` 的 `src` 以及表单提交，都是可以携带跨域的`Cookie`，没有同源策略的限制，这也是实际需求决定的，比如常用的CDN；
 3. 也就是说，浏览器向某个域名发送请求时，其请求都会自动携带该域名下的所有 `Cookie`，携带和获取不是一回事。
 
-也就是说，浏览器中有页面或网站向某个域名发送请求时，其请求都会自动携带该域名下的所有 `Cookie`，携带和获取不是一回事。
-
 ### 防范措施
 
 #### 1. 利用Cookie的SameSite属性
@@ -129,7 +137,7 @@ CSRF(Cross-site request forgery)，即**跨站请求伪造**，指的是黑客�
 
 * 在`Strict`模式下，浏览器完全禁止第三方请求携带Cookie。比如请求`A.com`网站只能在 `A.com`域名当中请求才能携带 `Cookie`，在其他网站请求都不能；
 
-* 在`Lax`模式，就宽松一点了，但是只能在 `get` 方法提交表单况或者 `a` 标签发送 `get` 请求的情况下可以携带 `Cookie`，其他情况均不能；
+* 在`Lax`模式，就宽松一点了，但是只能在 `get` 方法提交表单或者 `a` 标签发送 `get` 请求的情况下可以携带 `Cookie`，其他情况均不能；
 
 * 在`None`模式下，也就是默认模式，请求会自动携带上 `Cookie`。
 
