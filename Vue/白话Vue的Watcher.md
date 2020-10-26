@@ -123,7 +123,7 @@ https://juejin.im/post/6844903513009422343
 
 ### 连携反应
 
-### 模板直接引用 computed 属性
+#### 模板直接引用 computed 属性
 
 当 data 属性值发生修改，会带来什么反应呢？
 
@@ -138,7 +138,7 @@ https://juejin.im/post/6844903513009422343
 
 “待更新”(dirty)这样巧妙的设计，避免了computed 函数执行两次： computed-watcher 回调执行了一次 computed 函数，render-watcher 回调 render 函数，会触发 computed 属性的 get 进而又执行了 computed 函数
 
-### 模板嵌套引用 computed 属性
+#### 模板嵌套引用 computed 属性
 
 若出现当前 computed 计算属性嵌套其他 computed 计算属性时，先进行其他的依赖收集。
 
@@ -176,9 +176,10 @@ normal-watcher 还有一个特点，对于对象，默认只会监听对象的�
 
 1. 用 lazy 为 true 标示为它是一个 computed-watcher 
 2.  computed-watcher 的 get 和 set 是在初始化(initComputed)时经过 defineComputed() 方法重写了的 
-3. 当它所依赖的属性发生改变时虽然也会调用 computed-watcher 的 update()，但是因为它的 lazy 属性为 true，所以只执行把 dirty 设置为 true 这一个操作，并不会像 noraml-watcher 一样执行回调
+3. 当它所依赖的属性发生改变时虽然也会调用 computed-watcher 的 update()，但是因为它的 lazy 属性为 true，所以只执行把 dirty 设置为 true 这一个操作，并不会像 noraml-watcher 一样立即执行回调
 4. 当有用到这个 computed-watcher 的时候，例如视图渲染时调用了它时，才会触发 computed-watcher 的 get，但又由于这个 get 在初始化时被重写了，其内部会判断 dirty 的值是否为 true 来决定是否需要执行 evaluate() 重新计算 
 5. 因此有这么一句话：当计算属性所依赖的属性发生变化时并不会马上重新计算(只是将 dirty 设置为了 true 而已)，而是要等到其它地方读取这个计算属性的时候(会触发重写的 get )时才重新计算，因此它具备懒计算特性
+6. **计算属性不能执行异步任务，计算属性必须同步执行**。如果遇到异步任务，就交给侦听属性
 
 ## 关于 Object.defineProprety() 的缺点
 

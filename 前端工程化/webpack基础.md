@@ -26,7 +26,7 @@ npm init 命令
 
 ### 两种环境
 
-即 `process.env.NODE_ENV` 有 `'production'` 和 `'development'` 两种环境，生产环境和开发环境，一般我们用 `npm run build` 打包时是生产环境，而 `npm run dev` 的时候是开发环境。
+即 `process.env.NODE_ENV` 有 `production` 和 `development` 两种环境，生产环境和开发环境，一般我们用 `npm run build` 打包时是生产环境，而 `npm run dev` 的时候是开发环境。
 
 我们使用 webpack 时传递的 mode 参数， `webpack 4.x` 中，在我们的应用代码运行时，直接可以通过 `process.env.NODE_ENV` 这个变量获取的，这样方便我们在运行时判断当前执行的构建环境。
 
@@ -58,7 +58,7 @@ module.exports = {
 
 1. 使用场景不同
    * 使用 --save 安装的包是项目发布之后还需要依赖的包 ， 如axios, vue等包，等项目上线以后还需使用。
-   * 使用 --save-dev 安装的包则是开发时依赖的包，等项目上线则不会使。如项目中使用的压缩css、js 的模块等在项目上线后则不会使用。
+   * 使用 --save-dev 安装的包则是开发时依赖的包，等项目上线则不会使用。如项目中使用的压缩css、js 的模块等在项目上线后则不会使用。
 
 2. npm 安装时信息写入位置不同
 
@@ -151,7 +151,7 @@ module.exports = {
 - babel-preset-env
 - babel-preset-stage-2
 
-babel 的工作原理就是将 ES6 的代码解析生成`ES6的AST`，然后将 ES6 的 AST 转换为 `ES5 的AST`,最后才将 ES5 的 AST 转化为具体的 ES5 代码。
+**babel 的工作原理就是将 ES6 的代码解析生成`ES6的AST`，然后将 ES6 的 AST 转换为 `ES5 的AST`,最后才将 ES5 的 AST 转化为具体的 ES5 代码。**
 
 在 `webpack.config.js`，配置如下:
 
@@ -182,7 +182,7 @@ module.exports = {
 
 * `test: ... ` 字段是匹配规则，针对符合规则的文件进行处理
 
-- `include: ...  匹配特定路径
+- `include`: ...  匹配特定路径
 - `exclude: ... `排除特定路径
 
 ### use的写法
@@ -287,7 +287,7 @@ module.exports = {
 
 在前端项目的样式中总会使用到图片，虽然我们已经提到 `css-loader` 会解析样式中用 `url()` 引用的文件路径，但是图片对应的 `jpg/png/gif` 等文件格式，`webpack` 处理不了。
 
-我们可以使用 `url-loader` 或者 `file-loader` 来处理本地的资源文件。`url-loader` 和 `file-loader` 的功能类似，但是 `url-loader` 可以指定在文件大小小于指定的限制时，返回 `DataURL`，因此，个优先选择使用 `url-loader`。
+我们可以使用 `url-loader` 或者 `file-loader` 来处理本地的资源文件。`url-loader` 和 `file-loader` 的功能类似，但是 `url-loader` 可以指定在文件大小小于指定的限制时，返回 `DataURL`，因此，优先选择使用 `url-loader`。
 
 安装 `url-loader` 的时候，控制台会提示你，还需要安装下 `file-loader`，这个没啥说的，安装就好。
 
@@ -315,6 +315,28 @@ module.exports = {
 }
 ```
 
+## 热更新原理
+
+`HMR` 全称是 `Hot Module Replacement`，即模块热替换。在这个概念出来之前，我们使用过 `Hot Reloading`，当代码变更时通知浏览器刷新页面，以避免频繁手动刷新浏览器页面。HMR 可以理解为增强版的 `Hot Reloading`，但不用整个页面刷新，而是局部替换掉部分模块代码并且使其生效，可以看到代码变更后的效果。所以，`HMR` 既避免了频繁手动刷新页面，也减少了页面刷新时的等待，可以极大地提高前端页面开发效率...
+
+简单说：在 webpack 中，都是模块且有唯一标识，当文件内容改变时，通过建立好的socket通知浏览器，然后页面端的webpack脚手架代码会重载这个模块文件。
+
+1. 当修改了一个或多个文件；
+2. 文件系统接收更改并通知webpack；
+3. webpack重新编译构建一个或多个模块，并通知HMR服务器进行更新；
+4. HMR Server 使用webSocket通知HMR runtime 需要更新，HMR运行时通过HTTP请求更新jsonp；
+5. HMR运行时替换更新中的模块，如果确定这些模块无法更新，则触发整个页面刷新。
+
+hot-module-replacement-plugin 包给 webpack-dev-server 提供了热更新的能力，它们两者是结合使用的，单独写两个包也是出于功能的解耦来考虑的。
+
+1）webpack-dev-server(WDS)的功能提供 bundle server的能力，就是生成的 bundle.js 文件可以通过 localhost://xxx 的方式去访问，另外 WDS 也提供 livereload(浏览器的自动刷新)。
+
+2）hot-module-replacement-plugin 的作用是提供 HMR 的 runtime，并且将 runtime 注入到 bundle.js 代码里面去。一旦磁盘里面的文件修改，那么 HMR server 会将有修改的 js module 信息发送给 HMR runtime，然后 HMR runtime 去局部更新页面的代码。因此这种方式可以不用刷新浏览器。
+
+参考文章：
+
+[第 70 题： 介绍下 webpack 热更新原理，是如何做到在不刷新浏览器的前提下更新页面](https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/118)
+
 ## 优化
 
 ### 配置externals
@@ -334,7 +356,6 @@ module.exports = {
     <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
 </body>
 </html>
-复制代码
 ```
 
 我们希望在使用时，仍然可以通过 `import` 的方式去引用(如 `import $ from 'jquery'`)，并且希望 `webpack` 不会对其进行打包，此时就可以配置 `externals`

@@ -1,16 +1,18 @@
-[参考文章1](https://blog.csdn.net/weixin_37722222/article/details/90021406)
+[js的位置是否会影响首屏的加载时间](https://blog.csdn.net/weixin_37722222/article/details/90021406)
 
-[参考文章2](https://fed.taobao.org/blog/taofed/do71ct/mobile-wpo-pageshow-async/)
+[无线性能优化：页面可见时间与异步加载](https://fed.taobao.org/blog/taofed/do71ct/mobile-wpo-pageshow-async/)
 
-[参考文章3](https://www.cnblogs.com/jiasm/p/7683930.html)
+[浅谈script标签中的async和defer](https://www.cnblogs.com/jiasm/p/7683930.html)
 
-[参考文章4](http://interview.poetries.top/browser/part5/lesson23.html#%E9%82%A3%E6%B8%B2%E6%9F%93%E6%B5%81%E6%B0%B4%E7%BA%BF%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-cssom-%E5%91%A2%EF%BC%9F)
+[渲染流水线：CSS如何影响首次加载时的白屏时间？](http://interview.poetries.top/browser/part5/lesson23.html#%E9%82%A3%E6%B8%B2%E6%9F%93%E6%B5%81%E6%B0%B4%E7%BA%BF%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-cssom-%E5%91%A2%EF%BC%9F)
 
-[参考文章5](https://www.cnblogs.com/caizhenbo/p/6679478.html)
+[DOMContentLoaded与load的区别](https://www.cnblogs.com/caizhenbo/p/6679478.html)
 
-[参考文章6](https://www.jianshu.com/p/2bc93efe0958)
+[浏览器资源的加载与解析的影响与原因](https://www.jianshu.com/p/2bc93efe0958)
 
-https://www.cnblogs.com/wuguanglin/p/JSAndImgLoadOrder.html
+[页面js脚本与img等资源的下载顺序问题](https://www.cnblogs.com/wuguanglin/p/JSAndImgLoadOrder.html)
+
+[深入浅出浏览器渲染原理](https://github.com/ljianshu/Blog/issues/51)
 
 ### 普通script标签
 
@@ -38,7 +40,7 @@ HTML 4.0 规范，其作用是，告诉浏览器，等到 DOM+CSSOM 渲染完成
 >
 > - 浏览器完成解析 HTML 网页，此时再执行下载的脚本，完成后触发 DOMContentLoaded
 
-下载的脚本文件在 DOMContentLoaded 事件触发前执行（即刚刚读取完</html>标签），而且可以保证执行顺序就是它们在页面上出现的顺序。所以 添加 defer 属性后，domReady 的时间并没有提前，但它可以让页面更快显示出来。
+下载的脚本文件在 DOMContentLoaded 事件触发前执行（即刚刚读取完</html>标签），而且可以保证执行顺序就是它们在页面上出现的顺序。所以添加 defer 属性后，domReady 的时间并没有提前，但它可以让页面更快显示出来。
 
 将放在页面上方的 script 加 defer，在 PC Chrome 下其效果相当于把这个 script 放在底部，页面会先显示。 但对 iOS Safari 和 iOS WebView 加 defer 和 script 放底部一样都是长时间白屏。
 
@@ -86,7 +88,7 @@ load：当页面 DOM 结构中的所有资源都加载完成之后，包括 asyn
 
 ### 关于白屏时间
 
-- 首、白屏时间和 DomContentLoad 事件没有必然的先后关系，因为首屏图片加载完成才算首屏时间，所以与DOMContendLoad 不一定
+- 首、白屏时间和 DomContentLoad 事件没有必然的先后关系，因为首屏图片加载完成才算首屏时间，所以与DOMContendLoad 不一定谁先谁后
 
 - 所有 CSS 尽早加载是减少首屏时间的最关键
 
@@ -109,7 +111,8 @@ load：当页面 DOM 结构中的所有资源都加载完成之后，包括 asyn
 * CSS 不会阻塞 DOM 树的解析（因为 CSSOM 树和 DOM 树的构建在 GUI 渲染线程是并行的呀）
 * CSS 会阻塞页面渲染
 * CSS 会阻塞后面 JS 语句的执行，因为 JS 的执行必须在 CSSOM 树构建之后，JS 可能会操作 CSS，间接影响了 DOMContentLoaded 事件的触发
-* JS 为什么会阻塞 DOM 的解析？最直接准确的答案：因为 JS 引擎线程和 GUI 渲染线程是互斥的，必然是阻塞的，与其说是阻塞，不如说是 JS 引擎线程夺走了渲染进程内的控制权
+* JS 为什么会阻塞 DOM 的解析？最直接准确的答案**：因为 JS 引擎线程和 GUI 渲染线程是互斥的，必然是阻塞的，与其说是阻塞，不如说是 JS 引擎线程夺走了渲染进程内的控制权**
+* **JS文件不只是阻塞DOM的构建，它会导致CSSOM也阻塞DOM的构建**，原本DOM和CSSOM的构建是互不影响，井水不犯河水，但是一旦引入了JavaScript，CSSOM也开始阻塞DOM的构建，只有CSSOM构建完毕后，DOM再恢复DOM构建。但一旦引入JS，就变了，因为JavaScript不只是可以改DOM，它还可以更改样式，也就是它可以更改CSSOM。因为不完整的CSSOM是无法使用的，如果JavaScript想访问CSSOM并更改它，那么在执行JavaScript时，必须要能拿到完整的CSSOM。所以就导致了一个现象，如果浏览器尚未完成CSSOM的下载和构建，而我们却想在此时运行脚本，那么浏览器将延迟脚本执行和DOM构建，直至其完成CSSOM的下载和构建。也就是说，**在这种情况下，浏览器会先下载和构建CSSOM，然后再执行JavaScript，最后在继续构建DOM**。
 
 ### 为什么要强调CSS要放在header里，js放在尾部？
 

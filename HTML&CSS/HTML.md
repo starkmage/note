@@ -24,6 +24,8 @@
 <header>、<footer>、<section>、<article>、<nav>、<hgroup>、<aside>、<figure>
 ```
 
+语言化解读：[IFE-NOTE：页面结构语义化](https://rainylog.com/post/ife-note-1/)
+
 4. 废除一些网页美化方面的标签，使样式与结构分离更加彻底，包括
 
 ```html
@@ -54,7 +56,7 @@
 <!-- 默认占位文字 -->
 <input type=text placeholder="your message" >
 <!-- 默认聚焦属性 -->
-<input type=text autofacus="true" >
+<input type=text autofocus="true" >
 ```
 
 7. 其他标签新增了一些属性,
@@ -102,7 +104,7 @@
 <!-- 网页地址 -->
 <meta name="website" content="https://sanyuan0704.github.io/frontend_daily_question/"/>
 <!-- 网页版权信息 -->
- <meta name="copyright" content="2018-2019 demo.com"/>
+<meta name="copyright" content="2018-2019 demo.com"/>
 <!-- 网页关键字, 用于SEO -->
 <meta name="keywords" content="meta,html"/>
 <!-- 网页描述 -->
@@ -261,7 +263,7 @@ Web Worker 是HTML5标准的一部分，这一规范定义了一套 API，它允
 
    我们已经有了 web worker 文件，现在我们需要从 HTML 页面调用它。
 
-   下面的代码检测是否存在 worker，如果不存在，- 它会创建一个新的 web worker 对象，然后运行 "demo_workers.js" 中的代码：
+   下面的代码检测是否存在 worker，如果不存在，它会创建一个新的 web worker 对象，然后运行 "demo_workers.js" 中的代码：
 
    ``` js
    var w;

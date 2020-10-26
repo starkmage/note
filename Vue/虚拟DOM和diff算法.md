@@ -69,10 +69,10 @@ Virtual DOM 其实就是一棵以 JavaScript 对象( `VNode` 节点)作为基础
 
 为了避免不必要的 DOM 操作，虚拟 DOM 在`VNode`虚拟节点映射到视图的过程中，将虚拟节点与上一次渲染视图所使用的旧虚拟节点（`oldVnode`）利用 `diff` 算法做对比，找出真正需要更新的节点来进行`DOM`操作，从而避免操作其他无需改动的`DOM`。
 
-其实虚拟DOM在Vue.js主要做了两件事：
+**其实虚拟DOM在Vue.js主要做了两件事：**
 
-- 提供与真实DOM节点所对应的虚拟节点`VNode`
-- 将虚拟节点`VNode`和旧虚拟节点`oldVnode`进行对比，然后更新视图
+- **提供与真实DOM节点所对应的虚拟节点`VNode`**
+- **将虚拟节点`VNode`和旧虚拟节点`oldVnode`进行对比，然后更新视图**
 
 ## 为什么需要 Virtual DOM
 
@@ -204,6 +204,8 @@ patchVnode (oldVnode, vnode) {
     }
 }
 ```
+
+#### 如果新旧完全相同，直接返回
 
 #### 如果新的子 vnode 是文字 vnode
 

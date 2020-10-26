@@ -136,10 +136,10 @@ export default {
 ### query 和 params 的区别
 
 1. 用法
-   **query可以用path来引入，也可以用name引入，params要用name来引入。**接收参数都是类似的，分别是this.$route.query.name和this.$route.params.name。
+   **query可以用path来引入，也可以用name引入，params要用name来引入。**在前端接收参数都是类似的，分别是this.$route.query.name和this.$route.params.name。（在Node.js 中，如果params用了花括号形式传参，需要用query接收）
 
 2.  url地址显示
-    query更加类似于我们ajax中get传参，params则类似于post，说的再简单一点，前者在浏览器地址栏中显示参数，后者则不显示。
+    query更加类似于我们ajax中get传参，params则类似于post，说的再简单一点，前者在浏览器地址栏中显示参数，后者则不显示，需要在 router 里配置 /:key  才会显示在url里，而且是以路径的形式
 
    ```text
    // query
@@ -147,10 +147,14 @@ export default {
    
    // params
    http://localhost:8080/workorder/newApply
-   ```
-
+   或者配置了 /:type 的话，配置哪个显示哪个（没配置typeDesc就不显示）
+http://localhost:8080/workorder/newApply/BOX_DEPLOY
+    ```
+    
 3. 注意点
     query刷新不会丢失query里面的数据， params刷新会丢失 params里面的数据
+
+这篇文章[容易混淆-论query和params的使用区别](https://juejin.im/post/6844903872545161224)说的非常好
 
 ## 三类导航守卫
 

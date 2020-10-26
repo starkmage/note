@@ -8,7 +8,7 @@
    
 2. 新增Composition API，更好的逻辑复用和代码组织
 
-   * 在Vue2.x中，组件的主要逻辑是通过一些配置项来编写，包括一些内置的生命周期方法或者组件方法，这中基于配置的组件写法成为Options API（配置式API）
+   * 在Vue2.x中，组件的主要逻辑是通过一些配置项来编写，包括一些内置的生命周期方法或者组件方法，这种基于配置的组件写法称为Options API（配置式API）
 
    * Vue3的一大核心特性是引入了Composition API（组合式API），**这使得组件的大部分内容都可以通过setup() 方法进行配置**
 
@@ -59,8 +59,8 @@ Object.defineProperty(data, 'count', {
 
 ```js
 new Proxy(data, {
-  get(key) { },
-  set(key, value) { },
+  get(data, key) { },
+  set(data, key, value) { },
 })
 ```
 
@@ -82,7 +82,7 @@ new Proxy(data, {
 
 Vue2.0中，随着功能的增加，组件变得越来越复杂，越来越难维护，而难以维护的根本原因是Vue的API设计迫使开发者使用watch，computed，methods选项组织代码，而不是实际的业务逻辑。
 
-另外Vue2.0缺少一种较为简洁的低成本的机制来完成逻辑复用，虽然可以minxis完成逻辑复用，但是当mixin变多的时候，会使得难以找到对应的data、computed或者method来源于哪个mixin，使得类型推断难以进行。
+另外Vue2.0缺少一种较为简洁的低成本的机制来完成逻辑复用，虽然可以mixin完成逻辑复用，但是当mixin变多的时候，会使得难以找到对应的data、computed或者method来源于哪个mixin，使得类型推断难以进行。
 
 所以Composition API的出现，主要是也是为了解决Option API带来的问题，第一个是代码组织问题，Compostion API可以让开发者根据业务逻辑组织自己的代码，让代码具备更好的可读性和可扩展性，也就是说当下一个开发者接触这一段不是他自己写的代码时，他可以更好的利用代码的组织反推出实际的业务逻辑，或者根据业务逻辑更好的理解代码。
 
