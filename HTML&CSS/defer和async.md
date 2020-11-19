@@ -94,17 +94,17 @@ load：当页面 DOM 结构中的所有资源都加载完成之后，包括 asyn
 
 - script 标签放在 body 底部，做与不做 async 或者 defer 处理，都不会影响首屏时间，但影响DomContentLoad 和 load 的时间，进而影响依赖他们的代码的执行的开始时间
 
-- 白屏时间：从浏览器输入地址并回车后到页面开始有内容的时间；
+- **白屏时间：从浏览器输入地址并回车后到页面开始有内容的时间；**
 
   - ```js
     (window.chrome.loadTimes().firstPaintTime - window.chrome.loadTimes().startLoadTime)*1000
     ```
 
-- 首屏时间：从浏览器输入地址并回车后到首屏内容渲染完毕的时间；
+- **首屏时间：从浏览器输入地址并回车后到首屏内容渲染完毕的时间；**
 
-- 用户可操作时间节点：domready触发节点，点击事件有反应；
+- **用户可操作时间节点：domready触发节点，点击事件有反应；**
 
-- 总下载时间：window.onload的触发节点。
+- **总下载时间：window.onload的触发节点。**
 
 ### 关于阻塞
 
@@ -112,7 +112,7 @@ load：当页面 DOM 结构中的所有资源都加载完成之后，包括 asyn
 * CSS 会阻塞页面渲染
 * CSS 会阻塞后面 JS 语句的执行，因为 JS 的执行必须在 CSSOM 树构建之后，JS 可能会操作 CSS，间接影响了 DOMContentLoaded 事件的触发
 * JS 为什么会阻塞 DOM 的解析？最直接准确的答案**：因为 JS 引擎线程和 GUI 渲染线程是互斥的，必然是阻塞的，与其说是阻塞，不如说是 JS 引擎线程夺走了渲染进程内的控制权**
-* **JS文件不只是阻塞DOM的构建，它会导致CSSOM也阻塞DOM的构建**，原本DOM和CSSOM的构建是互不影响，井水不犯河水，但是一旦引入了JavaScript，CSSOM也开始阻塞DOM的构建，只有CSSOM构建完毕后，DOM再恢复DOM构建。但一旦引入JS，就变了，因为JavaScript不只是可以改DOM，它还可以更改样式，也就是它可以更改CSSOM。因为不完整的CSSOM是无法使用的，如果JavaScript想访问CSSOM并更改它，那么在执行JavaScript时，必须要能拿到完整的CSSOM。所以就导致了一个现象，如果浏览器尚未完成CSSOM的下载和构建，而我们却想在此时运行脚本，那么浏览器将延迟脚本执行和DOM构建，直至其完成CSSOM的下载和构建。也就是说，**在这种情况下，浏览器会先下载和构建CSSOM，然后再执行JavaScript，最后在继续构建DOM**。
+* **JS文件不只是阻塞DOM的构建，它会导致CSSOM也阻塞DOM的构建**，原本DOM和CSSOM的构建是互不影响，井水不犯河水，但是一旦引入了JavaScript，CSSOM也开始阻塞DOM的构建，就变了，因为JavaScript不只是可以改DOM，它还可以更改样式，也就是它可以更改CSSOM。因为不完整的CSSOM是无法使用的，如果JavaScript想访问CSSOM并更改它，那么在执行JavaScript时，必须要能拿到完整的CSSOM。所以就导致了一个现象，如果浏览器尚未完成CSSOM的下载和构建，而我们却想在此时运行脚本，那么浏览器将延迟脚本执行和DOM构建，直至其完成CSSOM的下载和构建。也就是说，**在这种情况下，浏览器会先下载和构建CSSOM，然后再执行JavaScript，最后在继续构建DOM**。
 
 ### 为什么要强调CSS要放在header里，js放在尾部？
 
@@ -128,7 +128,7 @@ load：当页面 DOM 结构中的所有资源都加载完成之后，包括 asyn
 
 ![img](https://images2015.cnblogs.com/blog/746387/201704/746387-20170407181912191-1031407943.png)
 
-我们再来看一下 chrome 在页面渲染过程中的，绿色标志线是 First Paint 的时间。为什么会出现 First Paint，页面的 paint 不是在渲染树生成之后吗？其实现代浏览器为了更好的用户体验,渲染引擎将尝试尽快在屏幕上显示的内容。它不会等到所有 HTML 解析之前开始构建和布局渲染树，部分的内容将被解析并显示。也就是说浏览器能够渲染不完整的 DOM 树和 CSSOM，尽快的减少白屏的时间。假如我们将 JS 放在 header，JS 将阻塞解析 DOM，DOM 的内容会影响到 First Paint，导致 First Paint 延后。所以说我们会将 JS 放在后面，以减少First Paint的时间，但是不会减少 DOMContentLoaded 被触发的时间。
+我们再来看一下 chrome 在页面渲染过程中的，绿色标志线是 First Paint 的时间。为什么会出现 First Paint，页面的 paint 不是在渲染树生成之后吗？其实现代浏览器为了更好的用户体验,渲染引擎将尝试尽快在屏幕上显示的内容。它不会等到所有 HTML 解析之前开始构建和布局渲染树，部分的内容将被解析并显示。**也就是说浏览器能够渲染不完整的 DOM 树和 CSSOM，尽快的减少白屏的时间**。假如我们将 JS 放在 header，JS 将阻塞解析 DOM，DOM 的内容会影响到 First Paint，导致 First Paint 延后。所以说我们会将 JS 放在后面，以减少First Paint的时间，但是不会减少 DOMContentLoaded 被触发的时间。
 
 在 body 中第一个 script 资源下载完成之前，浏览器会进行首次渲染，将该 script 标签前面的 DOM 树和 CSSOM 合并成一棵 Render 树，渲染到页面中。**这是页面从白屏到首次渲染的时间节点，比较关键**。
 

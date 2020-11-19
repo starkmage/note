@@ -99,8 +99,21 @@ module.exports = {
 3. 5.4.2版本后
 
    * 如果改了package.json，且package.json和lock文件不同，那么执行`npm i`时npm会根据package中的版本号以及语义含义去下载最新的包，并更新至lock
+* 如果两者是同一状态，那么执行`npm i `都会根据lock下载，不会理会package实际包的版本是否有新
 
-   * 如果两者是同一状态，那么执行`npm i `都会根据lock下载，不会理会package实际包的版本是否有新
+## 构建流程
+
+Webpack 的运行流程是一个串行的过程,从启动到结束会依次执行以下流程 :
+
+1. **初始化参数**：从配置文件和 Shell 语句中读取与合并参数,得出最终的参数
+2. **开始编译**：用上一步得到的参数初始化 Compiler 对象,加载所有配置的插件,执行对象的 run 方法开始执行编译
+3. **确定入口**：根据配置中的 entry 找出所有的入口文件。
+4. **编译模块**：从入口文件出发,调用所有配置的 Loader 对模块进行翻译,再找出该模块依赖的模块,再递归本步骤直到所有入口依赖的文件都经过了本步骤的处理
+5. **完成模块编译**：在经过第 4 步使用 Loader 翻译完所有模块后,得到了每个模块被翻译后的最终内容以及它们之间的依赖关系
+6. **输出资源**：根据入口和模块之间的依赖关系,组装成一个个包含多个模块的 Chunk,再把每个 Chunk 转换成一个单独的文件加入到输出列表,这步是可以修改输出内容的最后机会
+7. **输出完成**：在确定好输出内容后,根据配置确定输出的路径和文件名,把文件内容写入到文件系统。
+
+在以上过程中,Webpack 会在特定的时间点广播出特定的事件,插件在监听到感兴趣的事件后会执行特定的逻辑,并且插件可以调用 Webpack 提供的 API 改变 Webpack 的运行结果。
 
 ## 入口/出口配置
 
@@ -341,6 +354,8 @@ hot-module-replacement-plugin 包给 webpack-dev-server 提供了热更新的能
 
 ### 配置externals
 
+**防止**将某些 `import` 的包(package)**打包**到 bundle 中，而是在运行时(runtime)再去从外部获取这些*扩展依赖(external dependencies)*。
+
 我们可以将一些JS文件存储在 `CDN` 上(减少 `Webpack`打包出来的 `js` 体积)，在 `index.html` 中通过 `<script>` 标签引入，如:
 
 ```html
@@ -364,7 +379,7 @@ hot-module-replacement-plugin 包给 webpack-dev-server 提供了热更新的能
 //webpack.config.js
 module.exports = {
     externals: {
-      	// 左侧jquery是我们自己引入时候要用的，右侧是开发依赖库的主人定义的不能修改
+      	// 左侧jquery是我们自己引入时候要用的；右侧是开发依赖库的主人定义的不能修改，其实就是node-module文件中暴露出的全局变量
         'jquery': '$', 
     }
 }
@@ -400,9 +415,27 @@ module.exports = {
 };
 ```
 
+minimize 告知 webpack 使用 [TerserPlugin](https://webpack.docschina.org/plugins/terser-webpack-plugin/) 或其它在 [`optimization.minimizer`](https://webpack.docschina.org/configuration/optimization/#optimizationminimizer) 定义的插件压缩 bundle。
+
 minimize 和 minimizer 的区别：optimization.minimizer的数组列表中主要配置第三方的压缩插件，比如**TerserPlugin**。
 
 **Webpack4 不再支持UglifyJSPlugin，需要改为TerserPlugin**，因为 UglifyJSPlugin 不支持ES6了，所以用TerserPlugin
+
+``` js
+optimization: {
+  minimizer: [
+    new TerserPlugin({
+      // Must be set to true if using source-maps in production
+      sourceMap: true, 
+      terserOptions: {
+        compress: {
+          drop_console: true,
+        },
+      },
+    }),
+  ],
+}
+```
 
 [webpack4 升级的主要改变](https://www.taijicoder.com/2020/04/09/from-webpack2-to-webpack4/)
 
@@ -474,6 +507,18 @@ https://www.cnblogs.com/qiuzhimutou/p/7592875.html
 webpack打包过程中也是单线程的，特别是在执行loader的时候，长时间编译的任务很多，这样就会导致等待的情况。
 
 **HappyPack**可以将loader的同步执行转换为并行的，这样就能充分利用系统资源来加快打包效率了。
+
+### Tree Shaking
+
+tree shaking 是一个术语，通常用于描述移除 JavaScript 上下文中的未引用代码(dead-code)
+
+有的时候，代码里或者引用的模块里包含里一些没被使用的代码块，打包的时候也被打包到最终的文件里，增加了体积。这种时候，我们可以使用tree shaking技术来安全地删除文件中未使用的部分。
+
+使用方法：
+
+- 使用 ES2015 模块语法（即 import 和 export）。
+- 在项目 package.json 文件中，添加一个 "sideEffects" 属性。
+- 引入一个能够删除未引用代码(dead code)的压缩工具(minifier)（例如 UglifyJSPlugin）。
 
 ## Vue-cli3的 webpack 配置
 

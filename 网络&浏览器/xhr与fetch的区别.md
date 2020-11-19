@@ -91,11 +91,17 @@ axios({
 
 **2、方法内部创建一个Promise链式调用，**常用的功能，拦截器，数据修改器，http请求，就是在这个Promise链式调用中逐步被执行。**request**方法返回Promise链。我们用的就是这个返回的Promise，执行结果就在这个Promise中的状态值中。
 
+并发请求：
+
+配合axios.all()、axios.spread()同时发送多个请求
+
 参考文章：
 
 [Axios基本原理深度解析](https://juejin.im/post/6844904199302430733#heading-0)
 
 [axios执行原理了解一下！](https://juejin.im/post/6844903685068161038#heading-1)
+
+[axios.all()解决并发请求](https://segmentfault.com/a/1190000019882188)
 
 ## fetch
 
@@ -117,7 +123,7 @@ fetch('http://example.com/movies.json')
 **优势：跨域的处理**
 在配置中，添加`mode： 'no-cors'`就可以跨域了
 
-```
+```js
 fetch('/users.json', {
     method: 'post', 
     mode: 'no-cors',
@@ -127,13 +133,13 @@ fetch('/users.json', {
 
 **`fetch`目前遇到的问题**：
 
-1. `fetch`只对网络请求报错，对`400`，`500`都当做成功的请求，需要封装去处理。
-2. `fetch`默认不会带`cookie`，需要添加配置项。
-3. `fetch`不支持`abort`（终止），不支持超时控制，使用`setTimeout`及`Promise.reject`的实现超时控制并不能阻止请求过程继续在后台运行，造成了流量的浪费。
-4. `fetch`没有办法原生监测请求的进度，而`XHR`可以。
+1. `fetch`只对网络请求报错，对`400`，`500`都当做成功的请求，需要封装去处理。只有网络错误这些导致请求不能完成时，fetch 才会被 reject
+2. `fetch`默认不会带`cookie`，需要添加配置项：fetch(url, {credentials: 'include'})
+3. `fetch`不支持`abort`（终止），不支持超时控制，使用`setTimeout`及`Promise.reject`的实现超时控制并不能阻止请求过程继续在后台运行，造成了流量的浪费
+4. `fetch`没有办法原生监测请求的进度，而`XHR`可以
 
 **`fetch`规范与`jQuery.ajax()`主要有两种方式的不同，牢记：**
 
-1. 当接收到一个代表错误的 `HTTP 状态码`时，从 `fetch()`返回的 `Promise` **不会被标记为 reject**， 即使该 HTTP 响应的状态码是 `404` 或 `500`。相反，它会将 `Promise 状态`标记为 `resolve` （但是会将 `resolve`的返回值的 `ok` 属性设置为 `false` ），仅当网络故障时或请求被阻止时，才会标记为 `reject`。
+1. 当接收到一个代表错误的 `HTTP 状态码`时，从 `fetch()`返回的 `Promise` **不会被标记为 reject**， 即使该 HTTP 响应的状态码是 `404` 或 `500`。相反，它会将 `Promise 状态`标记为 `resolve` （但是会将 `resolve`的返回值的 `ok` 属性设置为 `false` ），仅当网络故障时或请求被阻止时，才会标记为 `reject`
 
-2. 默认情况下，`fetch` **不会从服务端发送或接收任何 cookies**, 如果站点依赖于用户 `session`，则会导致未经认证的请求（要发送 `cookies`，必须设置 `credentials` 选项）。
+2. 默认情况下，`fetch` **不会从服务端发送或接收任何 cookies**, 如果站点依赖于用户 `session`，则会导致未经认证的请求（要发送 `cookies`，必须设置 `credentials` 选项）

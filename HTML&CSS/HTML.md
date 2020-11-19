@@ -1,3 +1,54 @@
+## 标准模式和兼容模式
+
+DOCTYPE是document type的简写，它并不是 HTML 标签，也没有结束标签，它是一种标记语言的文档类型声明，**即告诉浏览器当前 HTML 是用什么版本编写的**。DOCTYPE的声明必须是 HTML 文档的第一行，位于html标签之前，对大小写不敏感。
+
+标准模式又称为严格模式，兼容模式又称为怪异模式、混杂模式，都是 HTML4.01中的模式。声明引用DTD,因为HTML4.01基于SGML。DTD规定了标记语言的规则，这样浏览器才能正确的呈现内容。
+
+html5不基于SGMl,所以不需要引用DTD。**html5没有这两种模式，它只有自己的html标准，是向后兼容的。所以说，第一行如果写`<!DOCTYPE html>`就是声明用的html5的标准。**
+
+``` html
+html5
+<!DOCTYPE httml>
+
+html4.01触发标准模式
+<!-- HTML 4.01 严格型 -->strict
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"  "http://www.w3.org/TR/html4/strict.dtd"> 
+触发兼容模式
+ <!-- HTML 4.01 过渡型 -->Transitional
+<!DOCTYPE HTML PUBLIC  "-//W3C//DTD HTML 4.01 Transitional//EN"  "http://www.w3.org/TR/html4/loose.dtd"> 
+ 
+<!-- HTML 4.01 框架集型 --> Frameset
+<!DOCTYPE HTML PUBLIC  "-//W3C//DTD HTML 4.01 Frameset//EN"  "http://www.w3.org/TR/html4/frameset.dtd"> 
+```
+
+**如果不写文档DOCTYPE声明，浏览器将无法获知HTML或XHTML文档的类型，会进入怪异模式；还有在IE6以下版本永远进入怪异模式**
+
+**若文档为标准模式，则该文档的排版与JS运作模式都是以该浏览器支持的最高标准运行；兼容模式中，页面以宽松的向后兼容的方式显示，模拟老式浏览器的行为以防止站点无法工作。如果浏览器进入兼容模式，就会按自己的方式解析渲染页面。那么，在不同的浏览器下，显示的样式效果会不一致。**
+
+参考文章：
+
+[html中doctype的作用及几种类型详解](https://www.liudaima.com/a/45.html)
+
+[HTML文件里开头的!Doctype有什么作用？](https://www.jianshu.com/p/ce48b13a4e1e)
+
+[严格模式与混杂模式-如何触发这两种模式，区分它们有何意义](https://blog.csdn.net/binglingnew/article/details/17301433)
+
+## HTML5 的新特性
+
+[参考链接](https://www.cnblogs.com/ainyi/p/9777841.html)
+
+1. 语义化标签:header、footer、section、nav、aside、article
+2. 增强型表单：input的多个type(color, date, datetime, email, month, number, range, search, tel, time, url, week)
+3. 新增表单元素：datalist、keygen、output
+4. 新增表单属性：placehoder, required, min和max, step, height 和 width, autofocus, multiple
+5. 音频视频：audio、video
+6. canvas
+7. 地理定位：
+8. 拖拽：drag
+9. 本地存储：localStorage、sessionStorage
+10. 新事件：onresize、ondrag、onscroll、onmousewheel、onerror、onplay、onpause
+11. WebSocket
+
 ## HTML5 和 HTML4.01 的主要区别
 
 ### 声明方面
@@ -291,5 +342,77 @@ Web Worker 是HTML5标准的一部分，这一规范定义了一套 API，它允
    }
    ```
 
-   
+**Web Worker 有两个特点：**
 
+1. **只能服务于新建它的页面，不同页面之间不能共享同一个 Web Worker。**
+2. **当页面关闭时，该页面新建的 Web Worker 也会随之关闭，不会常驻在浏览器中。**
+
+## PWA（Progressive Web Apps，渐进式网络应用程序）
+
+### 概念
+
+PWA相对于传统Web应用，主要在以下几个方面变得更强：
+
+- 观感方面：在手机上，可以添加Web应用到桌面，并可提供类似于Native应用的沉浸式体验（也就是可以隐藏浏览器的脑门）。这部分背后的技术是**manifest**。
+- 性能方面：由于本文主角Service Worker具有拦截浏览器HTTP请求的超能力，搭配CacheStorage，PWA可以提升Web应用在网络条件不佳甚至**离线时**的用户体验和性能。
+- 其它方面：**推送通知**、后台同步等可选的高级功能，这些功能也是利用**Service Worker**来实现的。
+
+### service worker
+
+#### 简介
+
+- `Service Worker`是浏览器在后台独立于网页运行的、用JavaScript编写的脚本。
+- **Service Worker 不是服务于某个特定页面的，而是服务于多个页面的。（按照同源策略）**
+- Service Worker 会**常驻在浏览器中**，即便注册它的页面已经关闭，Service Worker 也不会停止。本质上它是一个后台线程，只有你主动终结，或者浏览器回收，这个线程才会结束。
+- 本质上充当Web应用程序与浏览器之间的代理服务器，也可以在网络可用时作为浏览器和网络间的代理。
+- 它们旨在（除其他之外）使得能够创建有效的离线体验，拦截网络请求并基于网络是否可用以及更新的资源是否驻留在服务器上来采取适当的动作。他们还允许访问推送通知和后台同步`API`。
+
+```javascript
+// 不起眼的一行if，除了防止报错之外，也无意间解释了PWA的P：
+// 如果浏览器不支持Service Worker，那就当什么都没有发生过
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+        // 所以Service Worker只是一个挂在navigator对象上的HTML5 API而已
+        navigator.serviceWorker.register('/service-worker.js').then(function (registration) {
+            console.log('我注册成功了666');
+        }, function (err) {
+            console.log('我注册失败了');
+        });
+    });
+}
+```
+
+以下代码，可以拦截网页上所有png图片的请求，返回你的支付宝收款码图片，只要用户够多，总会有人给你打钱的。
+
+```javascript
+// service-worker.js
+// 虽然可以在里边为所欲为地写任何js代码，或者也可以什么都不写，
+// 都不妨碍这是一个Service Worker，但还是举一个微小的例子：
+self.addEventListener('fetch', function (event) {
+    if (/\.png$/.test(event.request.url)) {
+        event.respondWith(fetch('/images/支付宝收款码.png'));
+    }
+});
+```
+
+#### 生命周期
+
+Service Worker生命周期：安装中、安装后、激活中、激活后、已卸载。
+
+- 首次导航到网站时，会下载、解析并执行Service Worker文件，触发install事件，尝试安装Service Worker。
+- 如果install事件回调函数中的操作都执行成功，标志Service Worker安装成功，此时进入waiting状态。注意这时的Service Worker只是准备好了而已，并没有生效。
+- 当用户二次进入网站时，才会激活Service Worker，此时会触发activate事件，标志Service Worker正式启动，开始响应fetch、post、sync等事件。
+
+#### 主要事件
+
+- **install：Service Worker安装时触发，通常在这个时机缓存文件。**
+- activate：Service Worker激活时触发，通常在这个时机做一些重置的操作，例如处理旧版本Service Worker的缓存。
+- **fetch：浏览器发起HTTP请求时触发，通常在这个事件的回调函数中匹配缓存，是最常用的事件。**
+- push：和推送通知功能相关。
+- sync：和后台同步功能相关。
+
+#### 应用
+
+- 缓存静态资源：可以利用CacheStorage API来缓存js、css、字体、图片等静态文件。
+- 离线体验：如果我们首页index.html缓存下来，那我们的网页甚至可以支持离线浏览。
+- 消息推送
