@@ -149,8 +149,8 @@ export default {
    http://localhost:8080/workorder/newApply
    或者配置了 /:type 的话，配置哪个显示哪个（没配置typeDesc就不显示）
 http://localhost:8080/workorder/newApply/BOX_DEPLOY
-    ```
-    
+   ```
+   
 3. 注意点
     query刷新不会丢失query里面的数据， params刷新会丢失 params里面的数据
 
@@ -183,3 +183,143 @@ beforeRouterLeave——>beforeEach——>beforeEnter——>beforeRouterEnter—�
 加粗的是Vue的生命周期钩子函数
 
 参考文章：[vue-router导航守卫，不懂的来](https://zhuanlan.zhihu.com/p/54112006)
+
+## hash模式分享网页，#后被截断
+
+使用 vue 框架开发的应用，分享出去的链接会被截断：
+
+正常链接：[https://hxkj.vip/#/article?article_id=8](https://links.jianshu.com/go?to=https%3A%2F%2Fhxkj.vip%2F%23%2Farticle%3Farticle_id%3D8)
+分享出去的链接被打开之后变成了：[https://hxkj.vip/?from=singlemessage&isappinstalled=0](https://links.jianshu.com/go?to=https%3A%2F%2Fhxkj.vip%2F%3Ffrom%3Dsinglemessage%26isappinstalled%3D0)
+不仅路由被切掉了，参数也没了。。。。。。
+
+### 一、全局路由里拦截链接
+
+#### 1、在 # 号前面加上 ? 号
+
+经过试验发现，只要在路由的 # 号前面加上 ？号，微信分隔链接的时候只会在域名与参数之间加上 `?from=singlemessage&isappinstalled=0`，后面还是会携带原本的参数的，不会被完全切掉。所以，加上之后：
+
+```js
+let shareLink = 'https://hxkj.vip/?#/article?article_id=8';
+shareLink = shareLink.replace('/#/', '/?#/');
+```
+
+> 待分享的链接变成了：[https://hxkj.vip/?#/article?article_id=8](https://links.jianshu.com/go?to=https%3A%2F%2Fhxkj.vip%2F%3F%23%2Farticle%3Farticle_id%3D8)
+>  分享出去之后，链接变成了这个：[https://hxkj.vip/?from=singlemessage&isappinstalled=0#/article?article_id=8](https://links.jianshu.com/go?to=https%3A%2F%2Fhxkj.vip%2F%3Ffrom%3Dsinglemessage%26isappinstalled%3D0%23%2Farticle%3Farticle_id%3D8)
+
+发现区别了吧，这次虽然被插入了 `?from=singlemessage&isappinstalled=0` 这一串东西，但是最起码路由和参数还保留着，接下来我们就要对这一段链接进行处理了。
+
+#### 2、正则替换
+
+这一步需要在 vue 全局路由里完成，操作如下：
+
+```js
+// router.js
+router.beforeEach((to, from, next) => {
+    let url = window.location.href;
+    if (url.includes('?from=')) { // 判断是否携带了 from 参数，这一步灵活变通，只要能判断出是从微信分享链接进来的就 OK
+        url = url.replace(/vip.+.#/, 'vip/#'); // 利用正则表达式去掉微信携带的 ?from=singlemessage&isappinstalled=0 这串参数，如果这串参数对于你当前的页面有用处的话，可以重新拼接到你正常的链接后面去
+        window.location.href = url; // 重定向到正常链接
+    }
+})
+```
+
+上面这段代码的核心在于正则替换 `url = url.replace(/vip.+.#/, 'vip/#')`，这并不是吃饱了没事干，非要写正则。而是微信分享到每个渠道（微信单人聊天、微信群聊、朋友圈、QQ...）所携带的 `from` 参数是不一样的，所以需要从域名后缀那里开始往后匹配，直到 # 号为止。替换之后，就相当于把微信添加上去的那一串参数给删除了！
+
+以上步骤操作正确的话：
+
+> 待分享的链接为：[https://hxkj.vip/?#/article?article_id=8](https://links.jianshu.com/go?to=https%3A%2F%2Fhxkj.vip%2F%3F%23%2Farticle%3Farticle_id%3D8)
+>  分享出去之后，再次打开分享链接。由于路由那里做了处理，链接变为为正常状态：[https://hxkj.vip/#/article?article_id=8](https://links.jianshu.com/go?to=https%3A%2F%2Fhxkj.vip%2F%23%2Farticle%3Farticle_id%3D8)
+
+### 二、前端页面中转，重定向
+
+#### 1、新建中转页
+
+在 `public` 文件夹里新建一个 `html` 页面（与项目中 `index.html` 同级），命名为 `redirect.html`，文件内容如下：
+
+```html
+<script>
+    let url = location.href.split('?')
+    let params = url[1].split('&')
+    let data = {}
+    params.forEach((n, i) => {
+        let p = n.split('=')
+        data[p[0]] = p[1]
+    })
+    if (!!data.shareRedirect) {
+        window.location.href = decodeURIComponent(data.shareRedirect)
+    }
+</script>
+```
+
+因为只作为跳转使用，所以不需要其他的东西，只需要写 js 就可以了
+
+#### 2、组装分享链接
+
+把要分享的链接，设置为中间页面的路径
+
+```js
+let shareLink = 'https://hxkj.vip/#/article?article_id=8';
+shareLink = window.location.href.split('#')[0] + 'redirect.html?shareRedirect=' + encodeURIComponent(shareLink);
+```
+
+这个方法，比第一个方法多了个中间页，总体来说，还是比较方便的。
+
+以上步骤操作正确的话：
+
+> 待分享的链接为：[https://hxkj.vip/redirect.html?shareRedirect=https%3A%2F%2Fhxkj.vip%2F%3F%23%2Farticle%3Farticle_id%3D8](https://links.jianshu.com/go?to=https%3A%2F%2Fhxkj.vip%2Fredirect.html%3FshareRedirect%3Dhttps%3A%2F%2Fhxkj.vip%2F%3F%23%2Farticle%3Farticle_id%3D8)
+>  分享出去之后，再次打开分享链接。由于中间页面做了重定向处理，链接变为为正常状态：[https://hxkj.vip/#/article?article_id=8](https://links.jianshu.com/go?to=https%3A%2F%2Fhxkj.vip%2F%23%2Farticle%3Farticle_id%3D8)
+
+参考文章：
+
+[vue hash模式下微信分享后打开首页，三种完美解决方案](https://www.jianshu.com/p/97729dd2c94d)
+
+## encodeURI和encodeURIComponent
+
+这俩都是编码URL，可以把字符串作为 URI 组件进行编码，唯一区别就是编码的字符范围，其中：
+
+* encodeURI方法***不会***对下列字符编码  **ASCII字母  数字  ~!@#$&\*()=:/,;?+'**
+
+* encodeURIComponent方法***不会***对下列字符编码 **ASCII字母  数字  ~!\*()'**
+
+* 所以encodeURIComponent比encodeURI编码的范围更大。
+
+实际例子来说，encodeURIComponent会把 http://  编码成  http%3A%2F%2F 而encodeURI却不会。
+
+**什么场合应该用什么方法**
+
+如果需要编码整个URL，然后需要使用这个URL，那么用encodeURI
+
+比如
+
+```js
+encodeURI("http://www.cnblogs.com/season-huang/some other thing");
+```
+
+编码后会变为
+
+```js
+"http://www.cnblogs.com/season-huang/some%20other%20thing";
+```
+
+其中，空格被编码成了%20。但是如果你用了encodeURIComponent，那么结果变为
+
+```js
+"http%3A%2F%2Fwww.cnblogs.com%2Fseason-huang%2Fsome%20other%20thing"
+```
+
+连 "/" 都被编码了，整个URL已经没法用了。
+
+**当你需要编码URL中的参数的时候，那么encodeURIComponent是最好方法。**
+
+```js
+var param = "http://www.cnblogs.com/season-huang/"; //param为参数
+param = encodeURIComponent(param);
+var url = "http://www.cnblogs.com?next=" + param;
+console.log(url) //"http://www.cnblogs.com?next=http%3A%2F%2Fwww.cnblogs.com%2Fseason-huang%2F"
+```
+
+参数中的 "/" 可以编码，如果用encodeURI肯定要出问题，因为后面的/是需要编码的。
+
+参考文章：
+
+[escape,encodeURI,encodeURIComponent有什么区别?](https://www.zhihu.com/question/21861899)
