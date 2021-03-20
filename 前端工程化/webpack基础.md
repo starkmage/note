@@ -99,7 +99,8 @@ module.exports = {
 3. 5.4.2版本后
 
    * 如果改了package.json，且package.json和lock文件不同，那么执行`npm i`时npm会根据package中的版本号以及语义含义去下载最新的包，并更新至lock
-* 如果两者是同一状态，那么执行`npm i `都会根据lock下载，不会理会package实际包的版本是否有新
+   
+   * 如果两者是同一状态，那么执行`npm i `都会根据lock下载，不会理会package实际包的版本是否有新的
 
 ## 构建流程
 
@@ -141,13 +142,45 @@ loader是文件加载器，能够加载资源文件，并对这些文件进行�
 
 plugin是一个扩展器，它丰富了webpack本身，针对是loader结束后，webpack打包的整个过程，它并不直接操作文件，而是基于事件机制工作，会监听webpack打包过程中的某些节点，执行广泛的任务，比如打包优化等
 
-## 如何自定义webpack插件：
+## 如何自定义webpack插件
 
 - JavaScript 命名函数
 - 在插件函数的 prototype 上定义一个apply 方法
 - 定义一个绑定到 webpack 自身的hook
 - 处理webpack内部特定数据
 - 功能完成后调用 webpack 提供的回调
+
+一个典型的Webpack插件代码如下：
+
+```js
+// 插件代码
+class MyWebpackPlugin {
+  constructor(options) {
+  }
+  
+  apply(compiler) {
+    // 在emit阶段插入钩子函数
+    compiler.hooks.emit.tap('MyWebpackPlugin', (compilation) => {});
+  }
+}
+
+module.exports = MyWebpackPlugin;
+```
+
+接下来需要在webpack.config.js中引入这个插件。
+
+```js
+module.exports = {
+  plugins:[
+    // 传入插件实例
+    new MyWebpackPlugin({
+      param:'paramValue'
+    }),
+  ]
+};
+```
+
+Webpack在启动时会实例化插件对象，在初始化compiler对象之后会调用插件实例的apply方法，传入compiler对象，插件实例在apply方法中会注册感兴趣的钩子，Webpack在执行过程中会根据构建阶段回调相应的钩子。
 
 ## 入口/出口配置
 

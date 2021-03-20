@@ -7,17 +7,17 @@
 - 从**幂等性**的角度，`GET`是**幂等**的，而`POST`不是。(`幂等`表示执行相同的操作，结果也是相同的)
 - 从**TCP**的角度，GET 请求会把请求报文一次性发出去，而 POST 会分为两个 TCP 数据包，首先发 header 部分，如果服务器响应 100(continue)， 然后发 body 部分。(**火狐**浏览器除外，它的 POST 请求只发一个 TCP 包)
 
-参数长度的限制：
+* 参数长度的限制：
 
-HTTP 协议 未规定 GET 和 POST 的长度限制
+  HTTP 协议 未规定 GET 和 POST 的长度限制
 
-GET 的最大长度显示是因为浏览器和服务器限制了 URL 的长度
+  GET 的最大长度显示是因为浏览器和服务器限制了 URL 的长度
 
-不同的浏览器和WEB服务器，限制的最大长度不一样
+  不同的浏览器和WEB服务器，限制的最大长度不一样
 
-要支持IE，则最大长度为2083byte，若只支持Chrome，则最大长度 8182byte
+  要支持IE，则最大长度为2083byte，若只支持Chrome，则最大长度 8182byte
 
-使用xhr时
+* 使用xhr时
 
 ![](https://camo.githubusercontent.com/ef36bff2a3d3d0b12e96d481c20894fbaafb52f6/68747470733a2f2f757365722d676f6c642d63646e2e786974752e696f2f323031382f31322f31382f313637626366383365613762336662623f773d32393826683d31363926663d706e6726733d3335383634)
 
@@ -103,7 +103,7 @@ GET 的最大长度显示是因为浏览器和服务器限制了 URL 的长度
 http 1.0 :
 
 1. 默认不支持长连接，需要设置keep-alive参数指定
-2. 强缓存expired、协商缓存last-modified\if-modified-since 有一定的缺陷
+2. 强缓存expires、协商缓存last-modified\if-modified-since 有一定的缺陷
 
 http 1.1 :
 
@@ -121,7 +121,7 @@ http 1.1 :
 |    字符集    |   Accept-Charset: charset=utf-8    |          Content-Type: text/html; charset=utf-8           |
 | 资源修改时间 |     If-Modified-Since: 时间戳      |                   Last-Modified: 时间戳                   |
 |  资源标识符  |     If-None-Match: 哈希字符串      |                     Etag: 哈希字符串                      |
-|   缓存控制   | cache-control: max-age=0(刷新数据) | cache-control: public/private/no-cashe/no-store/max-age=X |
+|   缓存控制   | cache-control: max-age=0(刷新数据) | cache-control: public/private/no-cache/no-store/max-age=X |
 |    长连接    |    connection: keep-alive/close    |               connection: keep-alive/close                |
 
 ### content-type常用类型
@@ -173,11 +173,11 @@ Transfer-Encoding: chunked
 - Content-Length 字段会被忽略
 - 基于长连接持续推送动态内容
 
-## HTPP处理大文件传输
+## HTPP处理大文件请求
 
 http://47.98.159.95/my_blog/http/008.html#%E5%A6%82%E4%BD%95%E6%94%AF%E6%8C%81
 
-HTTP 针对这一场景，采取了`范围请求`的解决方案，允许客户端仅仅请求一个资源的一部分。
+HTTP 针对这一场景，采取了`范围请求`的解决方案，允许客户端仅仅请求一个资源的一部分。Ranges字段。
 
 ## HTTP处理表单数据提交
 
