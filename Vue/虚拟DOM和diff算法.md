@@ -47,7 +47,7 @@ Vue.prototype._render = function() {
 
 对于 Vue 组件来说，模板编译只会在组件实例化的时候编译一次，生成渲染函数之后再也不会进行编译。
 
-因此，runtime 需要是仅仅是 render 函数，编译对组件的 runtime 是一种性能损耗。而模板编译的目的仅仅是将`template`转化为`rende` 函数，而这个过程，正好可以在项目构建的过程中完成。这样可以让实际组件在 runtime 时直接跳过模板渲染，进而提升性能，这个在项目构建的编译template的过程，就是预编译。
+因此，runtime 需要是仅仅是 render 函数，编译对组件的 runtime 是一种性能损耗。而模板编译的目的仅仅是将`template`转化为`render` 函数，而这个过程，正好可以在项目构建的过程中完成。这样可以让实际组件在 runtime 时直接跳过模板渲染，进而提升性能，这个在项目构建的编译template的过程，就是预编译。
 
 比如`webpack`的`vue-loader`依赖了`vue-template-compiler`模块，在 webpack 构建过程中，将`template`预编译成 render 函数，在 runtime 可直接跳过模板编译过程。
 

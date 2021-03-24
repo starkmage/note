@@ -323,3 +323,49 @@ console.log(url) //"http://www.cnblogs.com?next=http%3A%2F%2Fwww.cnblogs.com%2Fs
 参考文章：
 
 [escape,encodeURI,encodeURIComponent有什么区别?](https://www.zhihu.com/question/21861899)
+
+## 路由懒加载的3种方式
+
+### Vue异步组件技术
+
+结合vue的异步组件和Webpack的代码分割功能可以实现路由组件的懒加载。打包后，每一个组件生成一个js文件。举例如下:
+
+```js
+{
+  path: '/Demo',
+  name: 'Demo',
+  //打包后，每个组件单独生成一个chunk文件
+  component: reslove => require(['../views/Demo'], resolve)
+}
+```
+
+### 动态import语法
+
+这种方法很常用
+
+``` js
+//默认将每个组件，单独打包成一个js文件
+const Demo = () => import('../views/Demo')
+const Demo1 = () => import('../views/Demo1')
+```
+
+有时我们想把某个路由下的所有组件都打包在同一个异步块(chunk)中。需要使用命名chunk一个特殊的注释语法来提供chunk name
+
+``` js
+//指定了相同的webpackChunkName,会合并打包成一个文件。
+const Demo = () => import(/*webpackChunkName:'Home'*/ '../views/Demo')
+const Demo1 = () => import(/*webpackChunkName:'Home'*/ '../views/Demo1')
+```
+
+### require.ensure()
+
+使用webpacke的require.ensure也可以实现按需加载
+
+- require.ensure()是webpack特有的，现在已经被import()取代
+- 这个特性依赖于内置的promise，低版本浏览器使用require.ensure需要考虑是否支持es6
+
+```js
+//这种情况下，多个路由指定相同的chunkName，会打包成一个文件
+const Demo = r => require.ensure([], () => r(require('../views/Demo')), 'Demo')
+const Demo1 = r => require.ensure([], () => r(require('../views/Demo1')), 'Demo')
+```

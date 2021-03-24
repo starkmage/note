@@ -583,9 +583,72 @@ tree shaking 是一个术语，通常用于描述移除 JavaScript 上下文中�
 
 使用方法：
 
-- 使用 ES2015 模块语法（即 import 和 export）。
-- 在项目 package.json 文件中，添加一个 "sideEffects" 属性。
-- 引入一个能够删除未引用代码(dead code)的压缩工具(minifier)（例如 UglifyJSPlugin）。
+**导入方式的规定：**
+
+- 使用 ES2015 模块语法（即 import 和 export）
+
+- 用支持 tree-shaking 的方式写 import
+
+  - 在编写支持 tree-shaking 的代码时，导入方式非常重要。你应该避免将整个库导入到单个 JavaScript 对象中。当你这样做时，你是在告诉 Webpack 你需要整个库， Webpack 就不会摇它。以流行的库 Lodash 为例。一次导入整个库是一个很大的错误，但是导入单个的模块要好得多。
+
+    ``` js
+    // 全部导入 (不支持 tree-shaking)
+    import _ from 'lodash';
+    // 具名导入(支持 tree-shaking)
+    import { debounce } from 'lodash';
+    // 直接导入具体的模块 (支持 tree-shaking)
+    import debounce from 'lodash/lib/debounce';
+    ```
+
+**webpack的配置：**
+
+* 必须处于生产模式。Webpack 只有在压缩代码的时候会 tree-shaking，而这只会发生在生产模式中。
+
+* 必须将优化选项 “usedExports” 设置为true。这意味着 Webpack 将识别出它认为没有被使用的代码，并在最初的打包步骤中给它做标记。
+
+- 引入一个能够删除未引用代码(dead code)的压缩工具(minifier)（例如 TerserPlugin）
+
+``` js
+const config = {
+ mode: 'production',
+ optimization: {
+  usedExports: true,
+  minimizer: [
+   new TerserPlugin({...})
+  ]
+ }
+};
+```
+
+**解决副作用：**
+
+仅仅因为 Webpack 看不到一段正在使用的代码，并不意味着它可以安全地进行 tree-shaking。有些模块导入，只要被引入，就会对应用程序产生重要的影响。一个很好的例子就是全局样式表，或者设置全局配置的JavaScript 文件。
+
+Webpack 认为这样的文件有“副作用”。具有副作用的文件不应该做 tree-shaking，因为这将破坏整个应用程序。Webpack 的设计者清楚地认识到不知道哪些文件有副作用的情况下打包代码的风险，**因此默认地将所有代码视为有副作用。这可以保护你免于删除必要的文件，但这意味着 Webpack 的默认行为实际上是不进行 tree-shaking。**
+
+在**项目 package.json 文件中**，添加一个 "sideEffects" 属性，就是来解决这个问题的。
+
+要想tree--shaking，每个项目都必须将 `sideEffects` 属性设置为 `false` 或文件路径数组。
+
+``` js
+// 所有文件都有副作用，全都不可 tree-shaking
+{
+ "sideEffects": true
+}
+// 没有文件有副作用，全都可以 tree-shaking
+{
+ "sideEffects": false
+}
+// 只有这些文件有副作用，所有其他文件都可以 tree-shaking，但会保留这些文件
+{
+ "sideEffects": [
+  "./src/file1.js",
+  "./src/file2.js"
+ ]
+}
+```
+
+https://www.jianshu.com/p/34b8f4062d2a
 
 ## Vue-cli3的 webpack 配置
 
