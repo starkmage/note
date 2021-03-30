@@ -478,3 +478,13 @@ vertical-align 实现的是近似垂直居中
 3. **性能**：提升为合成层，不会触发重绘，性能较高；
 4. **继承**：会被子元素继承,且，子元素**并不能**通过 `opacity: 1` 来取消隐藏；
 5. **transition**：`transition` 支持 `opacity`。
+
+## CSS:line-height:150%与line-height:1.5的真正区别是什么？
+
+150%是根据父元素的字体大小计算出行高，并且子元素依然沿用这个计算后的行高。而1.5则是根据子元素自己字体的大小去乘以1.5来计算行高。另，1.5em等也是按照150%的情况来算的。
+
+有单位时，子元素继承了父元素计算得出的行距；无单位时继承了系数，子元素会分别计算各自行距（推荐使用
+
+## 去除inline-block元素间间距
+
+[去除inline-block元素间间距的N种方法](https://www.zhangxinxu.com/wordpress/2012/04/inline-block-space-remove-%E5%8E%BB%E9%99%A4%E9%97%B4%E8%B7%9D/)

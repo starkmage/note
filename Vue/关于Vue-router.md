@@ -326,7 +326,7 @@ console.log(url) //"http://www.cnblogs.com?next=http%3A%2F%2Fwww.cnblogs.com%2Fs
 
 ## 路由懒加载的3种方式
 
-### Vue异步组件技术
+### Vue异步组件技术配合AMD
 
 结合vue的异步组件和Webpack的代码分割功能可以实现路由组件的懒加载。打包后，每一个组件生成一个js文件。举例如下:
 
