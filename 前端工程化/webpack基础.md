@@ -399,7 +399,7 @@ module.exports = {
 
 `HMR` 全称是 `Hot Module Replacement`，即模块热替换。在这个概念出来之前，我们使用过 `Hot Reloading`，当代码变更时通知浏览器刷新页面，以避免频繁手动刷新浏览器页面。HMR 可以理解为增强版的 `Hot Reloading`，但不用整个页面刷新，而是局部替换掉部分模块代码并且使其生效，可以看到代码变更后的效果。所以，`HMR` 既避免了频繁手动刷新页面，也减少了页面刷新时的等待，可以极大地提高前端页面开发效率...
 
-简单说：在 webpack 中，都是模块且有唯一标识，当文件内容改变时，通过建立好的socket通知浏览器，然后页面端的webpack脚手架代码会重载这个模块文件。
+**简单说：在 webpack 中，都是模块且有唯一标识，当文件内容改变时，通过建立好的socket通知浏览器，然后页面端的webpack脚手架代码会重载这个模块文件。**
 
 1. 当修改了一个或多个文件；
 2. 文件系统接收更改并通知webpack；
@@ -716,3 +716,13 @@ const MutiPageConfig = require('./MultiPage.config');
 // multiple-pages 多页面模式下构建应用 
 pages: MutiPageConfig,
 ```
+
+## webpack拆分代码的3种方法
+
+* entry入口配置多个入口文件
+* splitchunks抽离公共代码
+* 动态加载，（参考vue路由懒加载那里）
+
+https://imweb.io/topic/5b66dd601402769b60847149
+
+https://juejin.cn/post/6844903848977367048
