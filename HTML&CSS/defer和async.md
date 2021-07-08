@@ -113,6 +113,7 @@ load：当页面 DOM 结构中的所有资源都加载完成之后，包括 asyn
 * CSS 会阻塞后面 JS 语句的执行，因为 JS 的执行必须在 CSSOM 树构建之后，JS 可能会操作 CSS，间接影响了 DOMContentLoaded 事件的触发
 * JS 为什么会阻塞 DOM 的解析？最直接准确的答案**：因为 JS 引擎线程和 GUI 渲染线程是互斥的，必然是阻塞的，与其说是阻塞，不如说是 JS 引擎线程夺走了渲染进程内的控制权**
 * **JS文件不只是阻塞DOM的构建，它会导致CSSOM也阻塞DOM的构建**，原本DOM和CSSOM的构建是互不影响，井水不犯河水，但是一旦引入了JavaScript，CSSOM也开始阻塞DOM的构建，就变了，因为JavaScript不只是可以改DOM，它还可以更改样式，也就是它可以更改CSSOM。因为不完整的CSSOM是无法使用的，如果JavaScript想访问CSSOM并更改它，那么在执行JavaScript时，必须要能拿到完整的CSSOM。所以就导致了一个现象，如果浏览器尚未完成CSSOM的下载和构建，而我们却想在此时运行脚本，那么浏览器将延迟脚本执行和DOM构建，直至其完成CSSOM的下载和构建。也就是说，**在这种情况下，浏览器会先下载和构建CSSOM，然后再执行JavaScript，最后在继续构建DOM**。
+* **DOMContenLoad的触发，是不需要css加载完毕的。但是当有js的时候，必须等js同步代码执行完毕，才能触发DOMContenLoad，而js的执行，必须等待css解析完毕，所以导致css会影响DOMContenLoad的触发。⁣css加载会阻塞css后面js语句的执行，在css前面的js不需要等待（不关心）css。**
 
 ### 为什么要强调CSS要放在header里，js放在尾部？
 
