@@ -1,0 +1,42 @@
+## 装饰器
+
+* https://www.cnblogs.com/winfred/p/8216650.html
+* 种类
+  * 类装饰器
+  * 方法装饰器
+  * 方法参数装饰器
+  * 属性装饰器
+* 装饰器本质就是编译时执行的函数
+
+## 泛型
+
+https://juejin.cn/post/6844904184894980104#heading-0
+
+Partial，Record，这两个用到了
+
+[详解TypeScript中的三个泛型工具类：Omit、Pick、Exclude](https://github.com/FE-wuhao/TrivialKnowledge/issues/13)
+
+## TS 中 any 和 unkown 的区别
+
+**unknown 和 any 的主要区别是 unknown 类型会更加严格：在对 unknown 类型的值执行大多数操作之前，我们必须进行某种形式的检查。而在对 any 类型的值执行操作之前，我们不必进行任何检查。**
+
+举例说明：
+
+```ts
+let foo: any = 123;
+console.log(foo.msg); // 符合TS的语法
+let a_value1: unknown = foo;   // OK
+let a_value2: any = foo;      // OK
+let a_value3: string = foo;   // OK
+
+
+let bar: unknown = 222; // OK 
+console.log(bar.msg); // Error
+let k_value1: unknown = bar;   // OK
+let K_value2: any = bar;      // OK
+let K_value3: string = bar;   // Error
+```
+
+因为bar是一个未知类型(任何类型的数据都可以赋给 unknown 类型)，所以不能确定是否有msg属性。不能通过TS语法检测；而 unkown 类型的值也不能将值赋给 any 和 unkown 之外的类型变量
+
+> **总结：** any 和 unknown 都是顶级类型，但是 unknown 更加严格，不像 any 那样不做类型检查，反而 unknown 因为未知性质，不允许访问属性，不允许赋值给其他有明确类型的变量
