@@ -6,12 +6,12 @@
 
 2. 都有共同的方法：`item`，可以通过`item(index)`或者`item(id)`来访问返回结果中的元素
 
-3. 都是实时变动的（live），`document`上的更改会反映到相关对象上（例外：`querySeletorAll`返回的`NodeList`是个浅拷贝的类数组对象，在节点数目上是非实时的，不过对节点属性进行修改，还是实时反映的）
 
 ### 区别
 
 1. `HTMLCollection`只包含元素节点（elementNode），elementNode就是HTML中的标签；`NodeList`可以包含任何节点类型，换行符也被当作文本节点
 2. `HTMLCollection`比`NodeList`多一项方法：`namedItem`，可以通过传递id或name属性来获取节点信息
+3. querySelectorAll 返回的是一个 Static Node List，而 getElementsBy 系列的返回的是一个 Live Node List。
 
 ### 获取方法
 
