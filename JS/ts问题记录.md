@@ -1,6 +1,7 @@
 ## 装饰器
 
 * https://www.cnblogs.com/winfred/p/8216650.html
+* https://saul-mirone.github.io/zh-hans/a-complete-guide-to-typescript-decorator/
 * 种类
   * 类装饰器
   * 方法装饰器
