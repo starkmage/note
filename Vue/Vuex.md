@@ -81,3 +81,33 @@ methods: {
 }
 ```
 
+## Vuex缓存
+
+**为什么页面刷新后 vuex 的内容会清空呢？**
+
+因为 store 里的数据是保存在运行内存中的，当页面刷新时，页面会重新加载 Vue 实例，store 里面的数据就会被重新赋值初始化。
+
+**刷新的时候缓存下来数据**
+
+可以存到sessionStorage里
+
+在顶层app.vue文件
+
+``` vue
+methods:{
+  //将store中的数据存放到sessionStorage
+  saveState() {
+  	sessionStorage.setItem("state", JSON.stringify(this.$store.state));
+  }
+},
+created() {
+	//向window添加unload事件
+	window.addEventListener("unload", this.saveState);
+}
+```
+
+初始化state的时候
+
+``` js
+ const state = sessionStorage.getItem('state') ? JSON.parse(sessionStorage.getItem('state'))：{}
+```

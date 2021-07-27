@@ -416,3 +416,38 @@ Service Worker生命周期：安装中、安装后、激活中、激活后、已
 - 缓存静态资源：可以利用CacheStorage API来缓存js、css、字体、图片等静态文件。
 - 离线体验：如果我们首页index.html缓存下来，那我们的网页甚至可以支持离线浏览。
 - 消息推送
+
+## 前端实现下载功能的方式
+
+只需要知道文件在服务器上的地址，就可以通过a标签实现下载
+
+``` html
+<a href="https://.../158ac1e6917445a4aa384a2a7209445a.xlsx" download="test">下载文件</a>
+```
+
+download属性存放下载文件的名称，此属性为必须
+
+若文件地址为异步获取，即点击下载/导出按钮时才会从接口拿，则可以通过js插入a标签来实现。demo如下：
+
+异步获取文件路径之后执行以下代码即可自动下载
+
+```js
+// 创建a标签
+let a = document.createElement('a')
+// 定义下载名称
+a.download = '文件名称'
+// 隐藏标签
+a.style.display = 'none'
+// 设置文件路径
+a.href = 'https://.../158ac1e6917445a4aa384a2a7209445a.xlsx'
+// 将创建的标签插入dom
+document.body.appendChild(a)
+// 点击标签，执行下载
+a.click()
+// 将标签从dom移除
+document.body.removeChild(a)
+```
+
+缺点：此方式只适用于非图片和非pdf格式的文件下载，当文件为图片或pdf时，浏览器会打开预览，而非下载
+
+https://blog.csdn.net/hfhwfw161226/article/details/105700504

@@ -115,8 +115,6 @@ class B extends A {
 console.log(B.zsj);	// 静态属性
 ```
 
-
-
 ## 总结
 
 1. ES5 中子类构造函数不会继承父类构造函数的属性，而 ES6 中子类会继承父类的属性。ES5 中子类构造函数的 `__proto__` 指向的是 Function.prototype ，而 ES6 中是指向父类构造函数的。
@@ -131,3 +129,15 @@ console.log(B.zsj);	// 静态属性
 参考文章：
 
 [ES6 与 ES5 继承的区别](https://juejin.im/post/6844903924015120397)
+
+## 补充
+
+### ES5构造函数与ES6中Class的其它区别
+
+* class类必须new调用，不能直接执行
+* class类不存在变量提升
+* class类的实例无法遍历它原型链上的属性和方法
+
+### ES6中Class的原理
+
+ES6 中的类`Class`，仅仅只是基于现有的原型继承的一种语法糖，本质上不是严格意义上的类
