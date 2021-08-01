@@ -1,5 +1,65 @@
 https://github.com/ljianshu/Blog/issues/36
 
+## Vuex的原理
+
+**将数据存放到全局的store，再将store挂载到每个vue实例组件中，利用Vue.js的细粒度数据响应机制来进行高效的状态更新。**
+
+两个疑问：
+
+- **vuex的store是如何挂载注入到组件中呢？**
+
+1、在vue项目中先安装vuex，核心代码如下：
+
+```js
+import Vuex from 'vuex';
+Vue.use(vuex);// vue的插件机制
+```
+
+2、利用vue的[插件机制](https://cn.vuejs.org/v2/guide/plugins.html)，使用Vue.use(vuex)时，会调用vuex的install方法，装载vuex，install方法的代码如下：
+
+```js
+export function install (_Vue) {
+  if (Vue && _Vue === Vue) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.error(
+        '[vuex] already installed. Vue.use(Vuex) should be called only once.'
+      )
+    }
+    return
+  }
+  Vue = _Vue
+  applyMixin(Vue)
+}
+```
+
+3、applyMixin方法使用vue[混入机制](https://cn.vuejs.org/v2/guide/mixins.html)，vue的生命周期beforeCreate钩子函数前混入vuexInit方法，核心代码如下：
+
+```js
+Vue.mixin({ beforeCreate: vuexInit });
+ 
+function vuexInit () {
+    const options = this.$options
+    // store injection
+    if (options.store) {
+      this.$store = typeof options.store === 'function'
+        ? options.store()
+        : options.store
+    } else if (options.parent && options.parent.$store) {
+      this.$store = options.parent.$store
+    }
+}
+```
+
+分析源码，我们知道了vuex是利用vue的mixin混入机制，在beforeCreate钩子前混入vuexInit方法，vuexInit方法实现了store注入vue组件实例，并注册了vuex store的引用属性$store。
+
+- **vuex的state和getters是如何映射到各个组件实例中响应式更新状态呢？**
+
+Vuex的state状态是响应式，是借助vue的data是响应式，将state存入vue实例组件的data中；Vuex的getters则是借助vue的计算属性computed实现数据实时监听。
+
+参考文章：
+
+https://www.cnblogs.com/lguow/p/13753900.html
+
 ## 如何理解getters
 
 **getters从表面是获得的意思，可以把他看作在获取数据之前进行的一种再编辑,相当于对数据的一个过滤和加工**。getters就像计算属性一样，getter 的返回值会根据它的依赖被缓存起来，且只有当它的依赖值发生了改变才会被重新计算。

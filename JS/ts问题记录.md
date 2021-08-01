@@ -1,3 +1,21 @@
+## TS的优势
+
+### JavaScript 与 TypeScript 的区别
+
+TypeScript 是 JavaScript 的超集，扩展了 JavaScript 的语法，因此现有的 JavaScript 代码可与 TypeScript 一起工作无需任何修改，TypeScript 通过类型注解提供编译时的静态类型检查。
+
+TypeScript 可处理已有的 JavaScript 代码，并只对其中的 TypeScript 代码进行编译。
+
+![img](https://www.runoob.com/wp-content/uploads/2019/01/ts-2020-11-26-1.png)
+
+### 优势
+
+* 编译时的静态类型检查
+
+* 维护、重构方便
+* 多人开发，代码质量更好控制
+* 可以无需任何修改，同JS一起工
+
 ## 装饰器
 
 * https://www.cnblogs.com/winfred/p/8216650.html
@@ -41,3 +59,29 @@ let K_value3: string = bar;   // Error
 因为bar是一个未知类型(任何类型的数据都可以赋给 unknown 类型)，所以不能确定是否有msg属性。不能通过TS语法检测；而 unkown 类型的值也不能将值赋给 any 和 unkown 之外的类型变量
 
 > **总结：** any 和 unknown 都是顶级类型，但是 unknown 更加严格，不像 any 那样不做类型检查，反而 unknown 因为未知性质，不允许访问属性，不允许赋值给其他有明确类型的变量
+
+## TS的编译原理
+
+TS的编译部分主要由以下几个部分构成：
+
+- **Scanner 扫描器**（`scanner.ts`）
+- **Parser 解析器**（`parser.ts`）
+- **Binder 绑定器**（`binder.ts`）
+- **Checker 检查器**（`checker.ts`）
+- **Emitter 发射器**（`emitter.ts`）
+
+![](https://user-gold-cdn.xitu.io/2018/12/21/167d0e3f4f7cb536?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+大概工作流：
+
+1. SourceCode（源码） + 扫描器 --> Token 流
+2. Token 流 + 解析器 --> AST（抽象语法树）
+3. AST + 绑定器 --> Symbols（符号）
+4. AST + 符号 + 检查器 --> 类型验证
+5. AST + 检查器 + 发射器 --> JavaScript 代码
+
+参考文章：
+
+https://juejin.cn/post/6844903745503903758
+
+https://www.studyfe.cn/2019/08/05/typescript/compilationprinciple/
