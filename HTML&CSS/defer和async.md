@@ -169,3 +169,5 @@ JS 阻塞 DOM 解析，但浏览器会”偷看”DOM，预先下载相关资源
 浏览器遇到 script且没有defer或async属性的 标签时，会触发页面渲染，因而如果前面CSS资源尚未加载完毕时，浏览器会等待它加载完毕在执行脚本。
 
 https://ljf0113.github.io/2017/09/24/how-css-and-js-block-dom/
+
+https://juejin.cn/post/6844903667733118983
