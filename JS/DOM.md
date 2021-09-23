@@ -261,3 +261,6 @@ nodeValue 和 textContent 的区别：
 </html>
 ```
 
+## DOM触发的回调算什么任务
+
+https://www.zhihu.com/question/362096226

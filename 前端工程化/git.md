@@ -151,7 +151,7 @@ git status
 
 ## git merge 和 git rebase
 
-## 使用 `rebase` 和 `merge` 的基本原则：
+使用 `rebase` 和 `merge` 的基本原则：
 
 1. 下游分支更新上游分支内容的时候使用 `rebase`
 2. 上游分支合并下游分支内容的时候使用 `merge`

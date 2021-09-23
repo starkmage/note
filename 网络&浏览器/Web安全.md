@@ -161,10 +161,10 @@ form 发起的 POST 请求并不受到 CORS 的限制
 `SameSite`可以设置为三个值，`Strict`、`Lax`和`None`。
 
 * 在`Strict`模式下，浏览器完全禁止第三方请求携带Cookie。比如请求`A.com`网站只能在 `A.com`域名当中请求才能携带 `Cookie`，在其他网站请求都不能；
-
 * 在`Lax`模式，就宽松一点了，但是只能在 `get` 方法提交表单或者 `a` 标签发送 `get` 请求的情况下可以携带 `Cookie`，其他情况均不能；
-
 * 在`None`模式下，也就是默认模式，请求会自动携带上 `Cookie`。
+
+https://www.ruanyifeng.com/blog/2019/09/cookie-samesite.html
 
 #### 2.csrf token
 
