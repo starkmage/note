@@ -430,19 +430,19 @@ If the file address is obtained asynchronously, meaning it is fetched from an AP
 After async getting the file path, execute the following code to trigger automatic download.
 
 ```js
-// 创建a标签
+// create a tag
 let a = document.createElement('a')
-// 定义下载名称
+// set file name
 a.download = '文件名称'
 // hide the tag
 a.style.display = 'none'
-// 设置文件路径
+// set the file path
 a.href = 'https://.../158ac1e6917445a4aa384a2a7209445a.xlsx'
-// 将创建的标签插入dom
+// append the tag into body
 document.body.appendChild(a)
-// 点击标签，执行下载
+// trigger download
 a.click()
-// 将标签从dom移除
+// remove a tag from document
 document.body.removeChild(a)
 ```
 
