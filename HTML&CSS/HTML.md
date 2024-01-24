@@ -434,7 +434,7 @@ After async getting the file path, execute the following code to trigger automat
 let a = document.createElement('a')
 // 定义下载名称
 a.download = '文件名称'
-// 隐藏标签
+// hide the tag
 a.style.display = 'none'
 // 设置文件路径
 a.href = 'https://.../158ac1e6917445a4aa384a2a7209445a.xlsx'
