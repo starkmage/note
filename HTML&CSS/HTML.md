@@ -1,10 +1,10 @@
-## Standard Mode and Compatibility Mode
+## 标准模式和兼容模式
 
-The term "DOCTYPE" is an abbreviation for "document type," and it is not an HTML tag with an opening or closing tag. It serves as a document type declaration in markup languages, specifically indicating the version in which the HTML document is written. The DOCTYPE declaration must be the first line of an HTML document, preceding the opening `<html>` tag, and it is case-insensitive.
+DOCTYPE是document type的简写，它并不是 HTML 标签，也没有结束标签，它是一种标记语言的文档类型声明，**即告诉浏览器当前 HTML 是用什么版本编写的**。DOCTYPE的声明必须是 HTML 文档的第一行，位于html标签之前，对大小写不敏感。
 
-Standard mode, also known as strict mode, and compatibility mode, alternatively referred to as quirks mode or mixed mode, are both modes defined in HTML4.01. The declaration references the Document Type Definition (DTD) since HTML4.01 is based on SGML. The DTD specifies the rules of the markup language, allowing browsers to accurately render content.
+标准模式又称为严格模式，兼容模式又称为怪异模式、混杂模式，都是 HTML4.01中的模式。声明引用DTD,因为HTML4.01基于SGML。DTD规定了标记语言的规则，这样浏览器才能正确的呈现内容。
 
-In contrast, HTML5 is not based on SGML, eliminating the need for DTD references. **HTML5 does not have distinct standard and compatibility modes; instead, it adheres to its own HTML standard. It is backward-compatible, meaning that specifying `<!DOCTYPE html>` as the first line of the document declares the use of the HTML5 standard.**
+html5不基于SGMl,所以不需要引用DTD。**html5没有这两种模式，它只有自己的html标准，是向后兼容的。所以说，第一行如果写`<!DOCTYPE html>`就是声明用的html5的标准。**
 
 ``` html
 html5
@@ -21,9 +21,9 @@ html4.01触发标准模式
 <!DOCTYPE HTML PUBLIC  "-//W3C//DTD HTML 4.01 Frameset//EN"  "http://www.w3.org/TR/html4/frameset.dtd"> 
 ```
 
-**If the document lacks a DOCTYPE declaration, the browser will be unable to determine the type of the HTML or XHTML document, leading it to enter quirks mode. Additionally, in versions prior to IE6, the browser will always default to quirks mode.**
+**如果不写文档DOCTYPE声明，浏览器将无法获知HTML或XHTML文档的类型，会进入怪异模式；还有在IE6以下版本永远进入怪异模式**
 
-**In standard mode, the document's layout and JavaScript operations adhere to the highest standards supported by the browser. In compatibility mode, the page is displayed in a lenient, backward-compatible manner, emulating behaviors of older browsers to prevent site malfunctions. If the browser enters compatibility mode, it interprets and renders the page in its own way. Consequently, across different browsers, the displayed styles and effects may vary.**
+**若文档为标准模式，则该文档的排版与JS运作模式都是以该浏览器支持的最高标准运行；兼容模式中，页面以宽松的向后兼容的方式显示，模拟老式浏览器的行为以防止站点无法工作。如果浏览器进入兼容模式，就会按自己的方式解析渲染页面。那么，在不同的浏览器下，显示的样式效果会不一致。**
 
 参考文章：
 
@@ -33,41 +33,43 @@ html4.01触发标准模式
 
 [严格模式与混杂模式-如何触发这两种模式，区分它们有何意义](https://blog.csdn.net/binglingnew/article/details/17301433)
 
-## New features in HTML 5
+## HTML5 的新特性
 
 [参考链接](https://www.cnblogs.com/ainyi/p/9777841.html)
 
-1. Semantic Markup: header、footer、section、nav、aside、article
-2. Enhanced Forms: input starts to support some types(color, date, datetime, email, month, number, range, search, tel, time, url, week)
-3. New Form Types: datalist、keygen、output
-4. New Form Attributes: placehoder, required, min和max, step, height 和 width, autofocus, multiple
-5. audio、video
+1. 语义化标签:header、footer、section、nav、aside、article
+2. 增强型表单：input的多个type(color, date, datetime, email, month, number, range, search, tel, time, url, week)
+3. 新增表单元素：datalist、keygen、output
+4. 新增表单属性：placehoder, required, min和max, step, height 和 width, autofocus, multiple
+5. 音频视频：audio、video
 6. canvas
-7. location：
-8. drag
-9. storage：localStorage、sessionStorage
-10. new events：onresize、ondrag、onscroll、onmousewheel、onerror、onplay、onpause
+7. 地理定位：
+8. 拖拽：drag
+9. 本地存储：localStorage、sessionStorage
+10. 新事件：onresize、ondrag、onscroll、onmousewheel、onerror、onplay、onpause
 11. WebSocket
 
-## Differences between HTML5 and HTML4.01
+## HTML5 和 HTML4.01 的主要区别
 
-### Declaration
+### 声明方面
 
-1. HTML5 use the declaration as below
+1. HTML5 文件类型声明（<!DOCTYPE>）变成下面的形式：
 
 ```html
 <!DOCTYPE html>
 ```
 
-### Standard
+声明该 HTML 采用的是 HTML5 标准
 
-2. HTML5's document parsing is no longer based on the SGML (Standard Generalized Markup Language) standard; instead, it has its own set of standards.
+### 标准方面
 
-As a result, there is no need for a DOCTYPE to reference a Document Type Definition (DTD) in HTML5. Consequently, HTML5 eliminates the distinction between strict mode and quirks mode. HTML5 adopts a relatively lenient syntax, and in its implementation, efforts have been made to achieve maximum backward compatibility.
+2. HTML5的文档解析不再基于SGML(标准通用标记语言)标准，而是形成了自己的一套标准。
 
-### Tag
+因此 DOCTYPE 不需要对DTD进行引用，所以HTML5 也就没有严格模式与混杂模式的区别，HTML5 有相对宽松的语法，实现时，已经尽可能大的实现了向后兼容。
 
-3. New Semantic Markup
+### 标签方面
+
+3. 新增语义标签，其中包括
 
 ```html
 <header>、<footer>、<section>、<article>、<nav>、<hgroup>、<aside>、<figure>
@@ -75,18 +77,18 @@ As a result, there is no need for a DOCTYPE to reference a Document Type Definit
 
 语言化解读：[IFE-NOTE：页面结构语义化](https://rainylog.com/post/ife-note-1/)
 
-4. Deprecated embellishment tags to achieve a more thorough separation of style and structure. 
+4. 废除一些网页美化方面的标签，使样式与结构分离更加彻底，包括
 
 ```html
 <big>、<u>、<font>、<basefont>、<center>、<s>、<tt>
 ```
 
-5. Add `<audio>、<video>`
-6. Add `<canvas>`
+5. 通过增加了`<audio>、<video>`两个标签来实现对多媒体中的音频、视频使用的支持。
+6. 增加`<canvas>`绘图标签
 
-### Attribute
+### 属性方面
 
-6. New Form Features
+6. 增加了一些表单属性, 主要是其中的input属性的增强
 
 ```html
 <!-- 此类型要求输入格式正确的email地址 -->
@@ -108,7 +110,7 @@ As a result, there is no need for a DOCTYPE to reference a Document Type Definit
 <input type=text autofocus="true" >
 ```
 
-7. New attribute in the other tags
+7. 其他标签新增了一些属性,
 
 ```html
 <!-- meta标签增加charset属性 -->
@@ -117,7 +119,7 @@ As a result, there is no need for a DOCTYPE to reference a Document Type Definit
 <script async></script>
 ```
 
-8. Enable certain attribute names to default to boolean properties.
+8. 使部分属性名默认具有boolean属性
 
 ```html
 <!-- 只写属性名默认为true -->
@@ -126,27 +128,26 @@ As a result, there is no need for a DOCTYPE to reference a Document Type Definit
 <input type="checkbox"  checked="checked"/>
 ```
 
-### Storage
+### 存储方面
 
-9. Introduced WebStorage, including localStorage and sessionStorage.
+9. 新增WebStorage, 包括localStorage和sessionStorage
 
-10. Introduced IndexedDB and Web SQL, allowing the creation of database tables and storage of data on the client side.
-11. Introduced the Application Cache, enabling web caching for offline use. This is achieved by creating a cache manifest file to establish application caching, providing foundational technical support for Progressive Web Apps (PWAs).
+10. 引入了IndexedDB和Web SQL，允许在浏览器端创建数据库表并存储数据, 两者的区别在于IndexedDB更像是一个NoSQL数据库，而WebSQL更像是关系型数据库。W3C已经不再支持WebSQL。
 
-## meta tag attribute
+11. 引入了应用程序缓存器(application cache)，可对web进行缓存，在没有网络的情况下使用，通过创建cache manifest文件,创建应用缓存，为PWA(Progressive Web App)提供了底层的技术支持。
 
-Commonly used to define page descriptions, keywords, last modification date, and other metadata. This metadata serves browsers (for page layout or reloading), search engines, and other web services.
+## meta标签属性
 
-### charset
+常用于定义页面的说明，关键字，最后修改日期，和其它的元数据。这些元数据将服务于浏览器（如何布局或重载页面），搜索引擎和其它网络服务。
 
-Define the character set for a web document.
+### charset属性
 
 ```html
 <!-- 定义网页文档的字符集 -->
 <meta charset="utf-8" />
 ```
 
-### name + content
+### name + content属性
 
 ```html
 <!-- 网页作者 -->
@@ -163,7 +164,7 @@ Define the character set for a web document.
 <meta name="robots" content="all" />
 ```
 
-Especially for setting the viewport on mobile devices, the most commonly used.
+尤其是设置移动端窗口，最常用的
 
 ``` html
 <!-- 移动端常用视口设置 -->
@@ -175,11 +176,11 @@ Especially for setting the viewport on mobile devices, the most commonly used.
   initial-scale：初始的缩放比例 （范围从>0 到10）
   minimum-scale：允许用户缩放到的最小比例
   maximum-scale：允许用户缩放到的最大比例
-  user-scalable：用户是否可以Manually scale (no,yes)
+  user-scalable：用户是否可以手动缩 (no,yes)
  -->
 ```
 
-### http-equiv
+### http-equiv属性
 
 ```html
 <!-- expires指定网页的过期时间。一旦网页过期，必须从服务器上下载。 -->
@@ -196,19 +197,19 @@ Especially for setting the viewport on mobile devices, the most commonly used.
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 ```
 
-## Differences between link and @import
+## link和@import的区别
 
-1. `<link>` is an HTML tag that not only loads CSS files but also has various use cases,  like icon and font, `@import` is provided by CSS and serves the only purpose of importing style sheets.
+1. link 属于 HTML 标签，不只可以加载 CSS 文件，而 @import 是 CSS 提供的，只有导入样式表的作用
 
-2.  different importation code:
+2. 导入的语法不同
 
-   * link
+   * link（链接式）语法为：
 
    ``` html
    <link rel="stylesheet" href="style.css" type="text/css" />
    ```
 
-   * @import
+   * @import（导入式）语法为：
 
    ``` html
    <style>
@@ -216,27 +217,30 @@ Especially for setting the viewport on mobile devices, the most commonly used.
    </style>
    ```
 
-3. When the page is loaded, CSS linked with the `<link>` tag is loaded at the same time, and multiple CSS files linked with multiple `<link>` tags can be downloaded in parallel. In contrast, CSS imported with `@import` is loaded only after the page has finished loading.
+3. 加载页面时，link 标签引入的 CSS 被同时加载，并且多个 link 标签引入的 CSS 文件可以并行下载，而 @import 引入的 CSS 将在页面加载完毕后才被加载
 
-4. `<link>` is an HTML tag and doesn't pose compatibility issues, whereas `@import` is a CSS2.1 syntax and is recognized only by IE5 and later versions (though, adapting to IE5 is practically obsolete now).
+4. link 作为 HTML 标签，不存在兼容性问题，而 @import 是 CSS2.1 才有的语法，故只可以在 IE5+ 才可以识别（当然，现在谁还适配 IE5 ）
 
-5. The style applied by `<link>` can be dynamically changed by operating the DOM with JavaScript, while `@import` cannot be operated using JavaScript.
+5. 可以通过 JS 操作 DOM 插入 link 标签来改变样式，而 @import 是不能通过 JS 操作的
 
-6. It is important for `@import` to be placed at the beginning of the style sheet, whether it is an internal or external style sheet. If placed at the end, the browser will ignore it.
+6. @import 一定要放在样式表的前面，不管是内部样式还是外部样式，如果放在末尾就会被浏览器忽略
 
+## src 和 href 的区别
 
-## Differences between src and href
+### 定义区别
 
-### Definition
+href是Hypertext Reference的简写，表示超文本引用，指向网络资源所在位置。
 
-`href` is an abbreviation for Hypertext Reference, indicating a hyperlink reference that points to the location of a network resource.
+常见场景:
 
 ```html
 <a href="http://www.baidu.com"></a> 
 <link type="text/css" rel="stylesheet" href="common.css"> 
 ```
 
- `src` is a shortened form of source, serving the purpose of downloading a file into an HTML document.
+src是source的简写，目的是要把文件下载到html页面中去。
+
+常见场景:
 
 ```html
 <img src="img/girl.jpg"></img> 
@@ -244,125 +248,124 @@ Especially for setting the viewport on mobile devices, the most commonly used.
 <script src="show.js"> 
 ```
 
-### Different effects
+### 作用结果区别
 
-1. `href` is used to set a link between the current document and the referenced resource.
-2. `src` is used to replace the current content.
+1. href 用于在当前文档和引用资源之间确立联系
+2. src 用于替换当前内容
 
-### Browser parsing method
+### 浏览器解析方式
 
-1. When the browser encounters `href`, it will initiate parallel downloading of resources without interrupting the processing of the current document. (This is also why using the `link` method for loading CSS is recommended over the `@import` method.)
-2. When the browser encounters `src`, it will pause the downloading and processing of other resources until the specified resource is fully loaded or executed. (This is the reason why the `script` tag is often placed at the bottom rather than the head of the document.) (Additional note: Chrome optimizes this process by quickly checking if there are other resources that need to be downloaded after encountering a `script` tag. If so, it will download those resources first before proceeding with the resources associated with the `script`, thereby saving some download time.)
-3. When encountering the `src` attribute within an `img` tag, asynchronous parallel downloading occurs without blocking.
+1. 当浏览器遇到href会并行下载资源并且不会停止对当前文档的处理。(同时也是为什么建议使用 link 方式加载 CSS，而不是使用 @import 方式)
+2. 当浏览器解析到 src ，会暂停其他资源的下载和处理，直到将该资源加载或执行完毕。(这也是script标签为什么放在底部而不是头部的原因)（补充一点：Chrome会做一个优化，如果遇到`script`脚本，会快速的查看后边有没有需要下载其他资源的，如果有的话，会先下载那些资源，然后再进行下载`script`所对应的资源，这样能够节省一部分下载的时间）
+3. 遇到 img 标签中的 src，是会异步并行下载的，不会阻塞
 
-## Differences between Canvas and  SVG
+## Canvas 和 SVG的区别
 
 ### Canvas
 
-* `Canvas` is a new HTML5 tag used to draw 2D graphics through JavaScript.
+* Canvas 是 HTML5 新增的标签，通过 JavaScript 来绘制 2D 图形
 
-* `Canvas` relies on resolution and renders pixel by pixel.
+* Canvas 依赖分辨率，是逐像素进行渲染的
 
-* In `Canvas`, once a graphic is drawn, it no longer receives attention from the browser. If its position changes, the entire scene, including any objects that may have been covered by the graphic, needs to be redrawn.
+* 在 Canvas 中，一旦图形被绘制完成，它就不会继续得到浏览器的关注。如果其位置发生变化，那么整个场景也需要重新绘制，包括任何或许已被图形覆盖的对象
 
-* Does not support event handlers.
-
-* Limited text rendering capabilities.
-
-* Ability to save the resulting image in .png or .jpg format.
-
+- 不支持事件处理器
+- 弱的文本渲染能力
+- 能够以 .png 或 .jpg 格式保存结果图像
 
 ### SVG
 
-* `SVG` has a longer history and is a language that uses XML to describe 2D graphics.
-* Does not rely on resolution.
-* In `SVG`, each drawn graphic is treated as an object. If the properties of an SVG object change, the browser can automatically redraw the graphic.
-* Supports event handlers.
-* Most suitable for applications with large rendering areas (e.g., Google Maps).
-* Not suitable for gaming applications.
+* SVG 历史更悠久，是一种使用 XML 描述 2D 图形的语言
+* 不依赖分辨率
+* 在 SVG 中，每个被绘制的图形均被视为对象。如果 SVG 对象的属性发生变化，那么浏览器能够自动重现图形
+* 支持事件处理器
+* 最适合带有大型渲染区域的应用程序（比如谷歌地图）
+* 不适合游戏应用
 
-## Web Worker
+## WebWorker
 
-`Web Worker` is part of the HTML5 standard, which defines a set of APIs allowing a JavaScript program to run in a separate thread outside the main thread. `Web Worker` operates independently in the background, unaffected by other scripts, and does not impact the performance of the page.
+Web Worker 是HTML5标准的一部分，这一规范定义了一套 API，它允许一段 JavaScript 程序运行在主线程之外的另外一个线程中。 web worker 在后台运行，独立于其他脚本，不会影响页面的性能。
 
-It's worth noting that the `Web Worker` has two types of worker threads: `Dedicated Worker` and `Shared Worker`. A `Dedicated Worker` is exclusive to a single page, whereas a `Shared Worker` can be shared among multiple pages.
+值得注意的是， Web Worker 规范中定义了两类工作线程，分别是专用线程Dedicated Worker和共享线程 Shared Worker，其中，Dedicated Worker只能为一个页面所使用，而Shared Worker则可以被多个页面所共享。
 
-All major browsers support `Web Worker`, with the exception of Internet Explorer.
+所有主流浏览器均支持 web worker，除了 Internet Explorer。
 
-Simple Usage:
+简单的使用方法：
 
-1.**Create a Web Worker File:**
+1. 创建 web worker 文件
 
-Create a counting script stored in the "demo_workers.js" file:
+   创建一个计数脚本。该脚本存储于 "demo_workers.js" 文件中：
 
-```js
-var i = 0;
+   ```js
+   var i = 0;
+   
+   function timedCount() {
+     i = i + 1;
+     postMessage(i);
+     setTimeout("timedCount()", 500);
+   }
+   
+   timedCount();
+   ```
 
-function timedCount() {
-  i = i + 1;
-  postMessage(i); // Send count to the main thread
-  setTimeout("timedCount()", 500);
-}
+   以上代码中重要的部分是 `postMessage`() 方法 - 它用于向 HTML 页面传回一段消息。
 
-timedCount();
-```
+2. 创建 Web Worker 对象
 
-2.**Create the Web Worker Object:**
+   我们已经有了 web worker 文件，现在我们需要从 HTML 页面调用它。
 
-Now that we have the Web Worker file, let's invoke it from the HTML page.
+   下面的代码检测是否存在 worker，如果不存在，它会创建一个新的 web worker 对象，然后运行 "demo_workers.js" 中的代码：
 
-The following code checks for the existence of a worker. If it doesn't exist, it creates a new Web Worker object and runs the code from "demo_workers.js":
+   ``` js
+   var w;
+   // 开始计时
+   function startWorker()
+   {
+     // 浏览器是否支持 Web Worker
+     if(typeof(Worker) !== "undefined") {
+       if(typeof(w) == "undefined") {
+         w = new Worker("demo_workers.js");
+       }
+       // 监听消息
+       w.onmessage = function (event) {
+         document.getElementById("result").innerHTML=event.data;
+       };
+     }
+     else {
+      document.getElementById("result").innerHTML = "您的浏览器不支持 Web Worker";
+     }
+   }
+   // 停止计时
+   function stopWorker() {
+     // 终止 Web Worker
+   	w.terminate();
+   }
+   ```
 
-``` js
-var w;
-// 开始计时
-function startWorker()
-{
-  // 浏览器是否支持 Web Worker
-  if(typeof(Worker) !== "undefined") {
-    if(typeof(w) == "undefined") {
-      w = new Worker("demo_workers.js");
-    }
-    // 监听消息
-    w.onmessage = function (event) {
-      document.getElementById("result").innerHTML=event.data;
-    };
-  }
-  else {
-   document.getElementById("result").innerHTML = "您的浏览器不支持 Web Worker";
-  }
-}
-// 停止计时
-function stopWorker() {
-  // 终止 Web Worker
-	w.terminate();
-}
-```
+**Web Worker 有两个特点：**
 
-**Web Worker has two characteristics:**
+1. **只能服务于新建它的页面，不同页面之间不能共享同一个 Web Worker。**
+2. **当页面关闭时，该页面新建的 Web Worker 也会随之关闭，不会常驻在浏览器中。**
 
-1. **Can only serve the page that creates it; it cannot be shared among different pages.**
-2. **When a page is closed, the Web Worker created by that page will also be closed and will not persist in the browser.**
+## PWA（Progressive Web Apps，渐进式网络应用程序）
 
-## PWA（Progressive Web Apps）
+### 概念
 
-### Definition
+PWA相对于传统Web应用，主要在以下几个方面变得更强：
 
-Compared to traditional web applications, PWA excels in the following aspects:
-
-- **User Experience (UX):** On mobile devices, PWAs can be added to the home screen, providing an immersive experience similar to native applications (i.e., the ability to hide the browser's address bar). The underlying technology enabling this is the **manifest**.
-- **Performance:** With the central role played by Service Worker, equipped with the ability to intercept browser HTTP requests and coupled with CacheStorage, PWAs can enhance the user experience and performance of web applications, particularly in challenging network conditions and even when **offline**.
-- **Additional Features:** Optional advanced features such as **push notifications** and background synchronization are also made possible by leveraging **Service Worker**.
+- 观感方面：在手机上，可以添加Web应用到桌面，并可提供类似于Native应用的沉浸式体验（也就是可以隐藏浏览器的脑门）。这部分背后的技术是**manifest**。
+- 性能方面：由于本文主角Service Worker具有拦截浏览器HTTP请求的超能力，搭配CacheStorage，PWA可以提升Web应用在网络条件不佳甚至**离线时**的用户体验和性能。
+- 其它方面：**推送通知**、后台同步等可选的高级功能，这些功能也是利用**Service Worker**来实现的。
 
 ### service worker
 
-#### Introduction
+#### 简介
 
-- `Service Worker` is a JavaScript-scripted script running in the background independently of web pages within the browser.
-- **Service Worker does not serve a specific page but to multiple pages (subject to the same-origin policy).**
-- Service Worker remains **live in the browser** even if the page that registered it is closed; it does not stop. Essentially, it functions as a background thread that only terminates if actively terminated or when the browser recycle it.
-- Actually acts as a proxy server between a web application and the browser, serving as a proxy between the browser and the network when available.
-- They are designed, among other things, to enable the creation of effective offline experiences, intercept network requests. They also allow access to push notifications and the background sync `API`.
+- `Service Worker`是浏览器在后台独立于网页运行的、用JavaScript编写的脚本。
+- **Service Worker 不是服务于某个特定页面的，而是服务于多个页面的。（按照同源策略）**
+- Service Worker 会**常驻在浏览器中**，即便注册它的页面已经关闭，Service Worker 也不会停止。本质上它是一个后台线程，只有你主动终结，或者浏览器回收，这个线程才会结束。
+- 本质上充当Web应用程序与浏览器之间的代理服务器，也可以在网络可用时作为浏览器和网络间的代理。
+- 它们旨在（除其他之外）使得能够创建有效的离线体验，拦截网络请求并基于网络是否可用以及更新的资源是否驻留在服务器上来采取适当的动作。他们还允许访问推送通知和后台同步`API`。
 
 ```javascript
 // 不起眼的一行if，除了防止报错之外，也无意间解释了PWA的P：
@@ -380,7 +383,7 @@ if ('serviceWorker' in navigator) {
 }
 ```
 
-The following code can intercept requests for all PNG images on a webpage and respond with a specified image:
+以下代码，可以拦截网页上所有png图片的请求，返回你的支付宝收款码图片，只要用户够多，总会有人给你打钱的。
 
 ```javascript
 // service-worker.js
@@ -393,59 +396,59 @@ self.addEventListener('fetch', function (event) {
 });
 ```
 
-#### Lifecycle
+#### 生命周期
 
-Service Worker Lifecycle: Installing, Installed, Activating, Activated, and Uninstalled.
+Service Worker生命周期：安装中、安装后、激活中、激活后、已卸载。
 
-- When a user first navigates to a website, the Service Worker file is downloaded, parsed, and executed, triggering the `install` event to attempt the installation of the Service Worker.
-- If the operations in the `install` event callback are successful, the Service Worker is marked as installed, entering the waiting state. At this point, the Service Worker is prepared but not yet active.
-- When the user revisits the website, the Service Worker is activated, triggering the `activate` event. This marks the formal start of the Service Worker, allowing it to respond to events such as `fetch`, `post`, and `sync`.
+- 首次导航到网站时，会下载、解析并执行Service Worker文件，触发install事件，尝试安装Service Worker。
+- 如果install事件回调函数中的操作都执行成功，标志Service Worker安装成功，此时进入waiting状态。注意这时的Service Worker只是准备好了而已，并没有生效。
+- 当用户二次进入网站时，才会激活Service Worker，此时会触发activate事件，标志Service Worker正式启动，开始响应fetch、post、sync等事件。
 
-#### Key Events
+#### 主要事件
 
-- **install:** Triggered when the Service Worker is being installed. Typically used to cache files.
-- activate: Triggered when the Service Worker is activated. Commonly used for reset operations, such as handling the cache of the old version of the Service Worker.
-- **fetch:** Triggered when the browser makes an HTTP request. Often used to match cached resources; it is the most commonly used event.
-- push: Related to push notification functionality.
-- sync: Related to background sync functionality.
+- **install：Service Worker安装时触发，通常在这个时机缓存文件。**
+- activate：Service Worker激活时触发，通常在这个时机做一些重置的操作，例如处理旧版本Service Worker的缓存。
+- **fetch：浏览器发起HTTP请求时触发，通常在这个事件的回调函数中匹配缓存，是最常用的事件。**
+- push：和推送通知功能相关。
+- sync：和后台同步功能相关。
 
-#### Applications
+#### 应用
 
-- Caching static resources: Utilize the CacheStorage API to cache static files such as JavaScript, CSS, fonts, and images.
-- Offline experience: By caching the homepage (index.html), a website can support offline browsing.
-- Push notifications
+- 缓存静态资源：可以利用CacheStorage API来缓存js、css、字体、图片等静态文件。
+- 离线体验：如果我们首页index.html缓存下来，那我们的网页甚至可以支持离线浏览。
+- 消息推送
 
-## Download Functionality in Front-end
+## 前端实现下载功能的方式
 
-To achieve file download, you can use the `<a>` tag by simply knowing the file's server address. 
+只需要知道文件在服务器上的地址，就可以通过a标签实现下载
 
 ``` html
 <a href="https://.../158ac1e6917445a4aa384a2a7209445a.xlsx" download="test">下载文件</a>
 ```
 
-The `download` attribute holds the filename for download.
+download属性存放下载文件的名称，此属性为必须
 
-If the file address is obtained asynchronously, meaning it is fetched from an API only when the download/export button is clicked, you can use JavaScript to dynamically insert the `<a>` tag. The demo is as follows:
+若文件地址为异步获取，即点击下载/导出按钮时才会从接口拿，则可以通过js插入a标签来实现。demo如下：
 
-After async getting the file path, execute the following code to trigger automatic download.
+异步获取文件路径之后执行以下代码即可自动下载
 
 ```js
-// create a tag
+// 创建a标签
 let a = document.createElement('a')
-// set file name
+// 定义下载名称
 a.download = '文件名称'
-// hide the tag
+// 隐藏标签
 a.style.display = 'none'
-// set the file path
+// 设置文件路径
 a.href = 'https://.../158ac1e6917445a4aa384a2a7209445a.xlsx'
-// append the tag into body
+// 将创建的标签插入dom
 document.body.appendChild(a)
-// trigger download
+// 点击标签，执行下载
 a.click()
-// remove a tag from document
+// 将标签从dom移除
 document.body.removeChild(a)
 ```
 
-Drawback: This method is suitable only for downloading non-image and non-PDF files. When dealing with image or PDF files, the browser will open a preview instead of initiating the download.
+缺点：此方式只适用于非图片和非pdf格式的文件下载，当文件为图片或pdf时，浏览器会打开预览，而非下载
 
 https://blog.csdn.net/hfhwfw161226/article/details/105700504
