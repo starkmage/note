@@ -18,14 +18,11 @@ TypeScript 可处理已有的 JavaScript 代码，并只对其中的 TypeScript 
 
 ## 装饰器
 
-* https://www.cnblogs.com/winfred/p/8216650.html
-* https://saul-mirone.github.io/zh-hans/a-complete-guide-to-typescript-decorator/
-* 种类
-  * 类装饰器
-  * 方法装饰器
-  * 方法参数装饰器
-  * 属性装饰器
-* 装饰器本质就是编译时执行的函数（不是TypeScript编译，而是js在执行机中编译阶段）
+TypeScript 中的 **装饰器（Decorator）** 是一种特殊语法，用于通过声明式的方式修改类、方法、属性或参数的行为。装饰器本质上是一个函数，它在代码编译阶段（而非运行时）被调用，通过 `@` 符号附加到目标上。
+
+- **作用目标**：可以装饰类、类的方法、访问器（getter/setter）、属性、方法参数。
+- **执行时机**：在代码编译时执行（由 TypeScript 编译器处理），而非运行时。
+- **本质**：装饰器是一个函数，接收特定的元数据参数，返回修改后的目标或 void。
 
 ## 泛型
 

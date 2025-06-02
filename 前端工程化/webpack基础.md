@@ -30,19 +30,6 @@ npm init 命令
 
 我们使用 webpack 时传递的 mode 参数， `webpack 4.x` 中，在我们的应用代码运行时，直接可以通过 `process.env.NODE_ENV` 这个变量获取的，这样方便我们在运行时判断当前执行的构建环境。
 
-对于 `3.x` 版本应该如何实现。需要用到 `DefinePlugin` 插件，它可以帮助我们在构建时给运行时定义变量，那么我们只要在前面 `webpack 3.x` 版本区分[构建环境的例子的基础上](http://interview.poetries.top/docs/webpack.html#%E4%B8%83%E3%80%81%E5%BC%80%E5%8F%91%E5%92%8C%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E7%9A%84%E6%9E%84%E5%BB%BA%E9%85%8D%E7%BD%AE%E5%B7%AE%E5%BC%82)，再使用 `DefinePlugin` 添加环境变量即可影响到运行时的代码。
-
-``` js
-module.exports = {
-  plugins: [
-    new webpack.DefinePlugin({
-      // webpack 3.x 的 process.env.NODE_ENV 是通过手动在命令行中指定 NODE_ENV=... 的方式来传递的
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-    }),
-  ]
-}
-```
-
 #### 环境差异
 
 - 生产环境可能需要分离 `CSS`成单独的文件，以便多个页面共享同一个 `CSS` 文件
@@ -281,7 +268,7 @@ module.exports = {
     entry: './src/index.js',
     output: {
         path: path.resolve(__dirname, 'dist'), //必须是绝对路径
-        filename: 'bundle.js',
+        filename: 'bundle.js',+
         publicPath: '/' //通常是CDN地址
     }
 }
