@@ -1,3 +1,5 @@
+新内容建议参考：https://yuanbao.tencent.com/chat/naQivTmsDa/422528e6-eabe-42e8-bce8-8ff4df390804?projectId=2f13020843e3426ab5f1fc84dfe2aa87
+
 ## ES5中的继承
 
 * 组合式继承

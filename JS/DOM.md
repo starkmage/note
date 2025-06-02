@@ -1,51 +1,95 @@
 ## HTMLCollection 与 NodeList
 
-### 共同点
+HTMLCollection 和 NodeList 都是 DOM 中表示节点集合的对象，但它们有重要的区别。以下是它们的详细对比：
 
-1. 都是类数组对象，都有`length`属性
+### 1. HTMLCollection
 
-2. 都有共同的方法：`item`，可以通过`item(index)`或者`item(id)`来访问返回结果中的元素
+#### 特性
 
+- **动态集合**：会随 DOM 的变化自动更新
+- **只能包含元素节点**（Element nodes）
+- 通过以下方法返回：
+  - `document.getElementsByClassName()`
+  - `document.getElementsByTagName()`
+  - `element.children`
 
-### 区别
+#### 属性和方法
 
-1. `HTMLCollection`只包含元素节点（elementNode），elementNode就是HTML中的标签；`NodeList`可以包含任何节点类型，换行符也被当作文本节点
-2. `HTMLCollection`比`NodeList`多一项方法：`namedItem`，可以通过传递id或name属性来获取节点信息
-3. getElementsBy 系列的返回的是一个 Live Node List，而 querySelectorAll 返回的是一个 Static Node List。
+- `length`：集合中元素的数量
+- `item(index)`：获取指定索引的元素
+- `namedItem(name)`：通过 ID 或 name 属性获取元素
 
-### 获取方法
+#### 示例
 
-`getElementsByClassName` 之类得到的是 `HTMLCollection`，`queryselectorAll` 得到的是`NodeList`
+```
+const divs = document.getElementsByTagName('div');
+console.log(divs.length); // 当前div数量
 
-``` html
-<body>
-  <div class="demo">
-    内容1
-    <p>内容2</p>
-    <span>内容3</span>
-  </div>
-  
-  <script>
-    let d1 = document.getElementsByClassName('demo')
-    let d2 = document.querySelectorAll('.demo')
-    console.log(d1);
-    console.log(d2);
-  </script>
-</body>
+// 添加新div后
+document.body.appendChild(document.createElement('div'));
+console.log(divs.length); // 数量自动增加
 ```
 
-![](http://img.stark.pub/20201029195736.png)
+### 2. NodeList
 
-`elm.children` 得到的是 `HTMLCollection`，而 `elm.childrenNodes` 得到的是`NodeList`
+#### 特性
 
-``` js
-let d = document.querySelector('.demo')
+- **大多数是静态集合**（除了通过某些方法获取的）
+- 可以包含任何节点类型（元素节点、文本节点、注释节点等）
+- 通过以下方法返回：
+  - `document.querySelectorAll()`（静态）
+  - `element.childNodes`（动态）
+  - `document.getElementsByName()`（动态）
 
-console.log(d.children);
-console.log(d.childNodes);
+#### 属性和方法
+
+- `length`：集合中节点的数量
+- `item(index)`：获取指定索引的节点
+- `forEach()`（ES6新增）：可以遍历节点
+- `entries()`, `keys()`, `values()`（ES6新增）
+
+#### 示例
+
+```
+const nodes = document.querySelectorAll('div');
+console.log(nodes.length); // 当前匹配的div数量
+
+// 添加新div后
+document.body.appendChild(document.createElement('div'));
+console.log(nodes.length); // 数量不变（静态集合）
 ```
 
-![](http://img.stark.pub/20201029200144.png)
+### 3. 主要区别
+
+| 特性         | HTMLCollection       | NodeList                       |
+| ------------ | -------------------- | ------------------------------ |
+| 动态性       | 总是动态             | 大多数静态（除了childNodes等） |
+| 包含节点类型 | 仅元素节点           | 所有类型节点                   |
+| 遍历方法     | 无forEach            | 有forEach（ES6+）              |
+| 获取方式     | getElementsBy...方法 | querySelectorAll, childNodes等 |
+| 性能         | 通常更快             | 可能稍慢                       |
+
+### 4. 转换为数组
+
+由于它们都是类数组对象，有时需要转换为真正数组：
+
+```
+// HTMLCollection转数组
+const htmlArr = [...document.getElementsByTagName('div')];
+// 或
+const htmlArr = Array.from(document.getElementsByClassName('item'));
+
+// NodeList转数组
+const nodeArr = [...document.querySelectorAll('p')];
+// 或
+const nodeArr = Array.from(document.childNodes);
+```
+
+### 5. 使用建议
+
+1. 如果需要**实时更新的集合**，使用HTMLCollection
+2. 如果需要**快照**且不关心后续DOM变化，使用NodeList（querySelectorAll）
+3. 现代开发中，可以优先使用`Array.from()`或扩展运算符转换为数组，以便使用丰富的数组方法。
 
 ## DOM API中append和appendChild的三个不同点
 

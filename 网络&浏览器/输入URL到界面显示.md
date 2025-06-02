@@ -89,3 +89,22 @@
 　　**8）保存结果至缓存**
 
 　　本地域名服务器把返回的结果保存到缓存，以备下一次使用，同时将该结果反馈给客户端，客户端通过这个IP地址与web服务器建立链接。
+
+### DNS服务器层次结构示例
+
+```
+客户端 → 递归解析器 → 根服务器 → .com服务器 → example.com服务器
+                      (.)        (TLD)       (Authoritative)
+```
+
+### 实际DNS查询示例
+
+以查询"http://www.example.com"为例：
+
+1. 递归解析器查询根服务器："http://www.example.com在哪里？"
+   - 根服务器回答："我不知道，但.com服务器可能知道，地址是X.X.X.X"
+2. 查询.com服务器
+   - .com服务器回答："我不知道http://www.example.com，但example.com的服务器在Y.Y.Y.Y"
+3. 查询example.com的权威服务器
+   - 权威服务器返回："http://www.example.com的IP是Z.Z.Z.Z"
+4. 递归解析器将结果返回客户端并缓存
