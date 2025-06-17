@@ -22,7 +22,7 @@ https://yuanbao.tencent.com/chat/naQivTmsDa/e093df06-72e2-4f39-8050-6ccadbbb0c81
 
   - 每个 Hook 节点的结构如下：
 
-    ```
+    ```ts
     type Hook = {
       memoizedState: any,      // 当前状态（如 state、effect 对象等）
       baseState: any,         // 基础状态（用于更新计算）
@@ -48,7 +48,7 @@ https://yuanbao.tencent.com/chat/naQivTmsDa/e093df06-72e2-4f39-8050-6ccadbbb0c81
 
 - `memoizedState`：存储一个 effect 对象，结构如下：
 
-  ```
+  ```ts
   type Effect = {
     tag: number,           // 标识 effect 类型（如 PassiveEffect、LayoutEffect）
     create: () => (() => void) | void, // 副作用函数
@@ -93,6 +93,18 @@ type Fiber = {
    - React 遍历 `fiber.memoizedState` 链表，复用或更新 Hook。
    - 比较 `deps` 决定是否重新执行 effect。
 
+### 6.**不管组件定义了多少 `useEffect`，`memoizedState` 只会有一个 Effect 对象吗**
+
+❌ 不正确
+
+- 每个 `useEffect` 都会在 `fiber.memoizedState` 链表中创建一个 **独立的 Hook 节点**，每个节点的 `memoizedState` 存储自己的 Effect 对象。
+- 但 React 会将这些 Effect 对象 **额外链接到 `fiber.updateQueue`** 中，形成环形链表供调度使用。
+
+### **7. 为什么这样设计？**
+
+1. **Hook 独立性**：每个 Hook 的状态（如 `useState` 的 state、`useEffect` 的 deps）需要隔离，避免互相污染。
+2. **批量调度效率**：通过 `updateQueue` 链表，React 可以在提交阶段（commit phase）高效遍历并执行所有 Effect。
+
 ------
 
 ### 总结
@@ -116,7 +128,7 @@ Suspense是React的一个特性，它允许你在组件加载时显示一个备�
 
 ### 基本用法
 
-```
+```jsx
 import React, { Suspense } from 'react';
 
 // 使用React.lazy动态导入组件
@@ -141,7 +153,7 @@ function MyComponent() {
 
 ### 多个懒加载组件
 
-```
+```jsx
 <Suspense fallback={<div>Loading...</div>}>
   <OtherComponent />
   <AnotherComponent />
@@ -150,7 +162,7 @@ function MyComponent() {
 
 ### 嵌套Suspense
 
-```
+```jsx
 <Suspense fallback={<div>Loading outer...</div>}>
   <Component1 />
   <Suspense fallback={<div>Loading inner...</div>}>

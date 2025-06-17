@@ -70,6 +70,78 @@ const [optimisticState, addOptimistic] = useOptimistic(state, updateFn);
 - 评论系统：用户发表评论时立即显示，即使网络请求还在进行[^7][^6]
 - 点赞功能：用户点赞时立即更新UI，提供即时反馈[^7]
 
+**`useOptimistic` 的核心思想是"暂时显示假数据，最终同步真数据"**，React 会自动处理同步过程。
+
+**完整的工作流程:**
+
+1. **触发乐观更新**：
+
+   ```
+   addOptimisticMessage(message); // 立即更新UI
+   ```
+
+   - 这会调用你提供的 reducer 函数，创建一个临时状态
+   - UI 立即更新，用户看到"发送中"的消息
+
+2. **发起异步操作**：
+
+   ```
+   await sendMessage(message); // 实际发送到服务器
+   ```
+
+3. **React 的自动处理**：
+
+   - 当组件重新渲染时（比如因为状态更新或父组件渲染）
+   - React 会比较 `messages` prop（真实数据）和当前的乐观状态
+   - 如果发现不同，React 会用最新的 `messages` prop 替换乐观状态
+
+```react
+function Chat({ messages, sendMessage }) {
+  // 使用useOptimistic Hook
+  // 参数1: 当前的真实消息列表
+  // 参数2: 一个reducer函数，用于计算乐观更新后的状态
+  // 返回值1: 乐观状态（可能包含尚未确认的更新）
+  // 返回值2: 触发乐观更新的函数
+  const [optimisticMessages, addOptimisticMessage] = useOptimistic(
+    messages,
+    // 这个函数定义了如何应用乐观更新
+    // state: 当前状态
+    // newMessage: 传递给addOptimisticMessage的参数
+    (state, newMessage) => [
+      ...state, // 保留已有消息
+      {
+        text: newMessage, // 添加新消息
+        sending: true // 标记为"发送中"状态
+      }
+    ]
+  );
+
+  async function handleSend(formData) {
+    const message = formData.get('message');
+    
+    // 1. 乐观更新：立即显示消息
+    addOptimisticMessage(message);
+    
+    try {
+      // 2. 实际发送到服务器
+      await sendMessage(message);
+      
+      // 3. 如果成功：
+      //    - 父组件应该更新messages prop
+      //    - React会自动用新messages替换乐观状态
+    } catch (error) {
+      // 4. 如果失败：
+      //    - 父组件不会更新messages prop
+      //    - React会自动丢弃乐观更新，回滚到之前的messages
+      console.error('发送失败:', error);
+    }
+  }
+
+  return (
+    /* ... UI代码 ... */
+  );
+}
+```
 
 ### useActionState
 
@@ -90,7 +162,8 @@ React 19引入了全新的`use` API，可以在渲染期间读取资源[^11][^12
 
 - 可以处理Promise和Context[^12]
 - 简化异步数据获取[^12]
-- 需要配合Suspense使用[^12]
+- 需要配合Suspense使用
+- 可以在条件语句和循环中使用（打破了 Hooks 的规则限制）
 
 ```javascript
 import { use, Suspense } from 'react';
