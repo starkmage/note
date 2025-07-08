@@ -192,3 +192,12 @@ const p = new PersonProxy("Alice"); // 控制台：正在创建实例: ["Alice"]
 | `Reflect.defineProperty`           | 类似 `Object.defineProperty`           | 定义属性                   |
 | `Reflect.construct()`              | 构造函数执行 `new` 行为                | 用于 Proxy 构造器拦截      |
 | `Reflect.apply()`                  | 执行函数（类似 `fn.apply`）            | 用于函数调用代理           |
+
+# Object.is和===什么区别
+
+`Object.is` 和 `===`（严格相等）在大多数情况下表现一致，但它们在**少数边界情况**有**显著不同**。
+
+| 情况           | `===` 结果 | `Object.is` 结果 | 说明                           |
+| -------------- | ---------- | ---------------- | ------------------------------ |
+| `+0` 和 `-0`   | `true`     | `false`          | `Object.is` 区分 +0 和 -0      |
+| `NaN` 和 `NaN` | `false`    | `true`           | `Object.is` 能判断 NaN === NaN |
