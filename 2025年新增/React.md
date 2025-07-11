@@ -268,3 +268,59 @@ function MyComponent() {
 3. 对于复杂应用，考虑将Suspense放在路由级别
 
 通过合理使用Suspense，你可以显著改善大型React应用的加载体验。
+
+## React HOC 面试介绍
+
+### 1. 什么是 HOC？
+
+（Higher-Order Component，高阶组件）
+
+- **定义**：HOC 是一个函数，接受一个组件作为参数，返回一个新的增强后的组件。
+- 它是 React 组件复用逻辑的一种高级技巧，属于“组件组合”的模式。
+- 公式表达：`const EnhancedComponent = higherOrderComponent(WrappedComponent)`
+
+### 2. HOC 的作用
+
+- 代码复用、抽象状态和逻辑，比如权限控制、数据获取、UI 状态管理、性能优化等。
+- 避免重复代码，提高组件的复用性和维护性。
+
+### 3. HOC 的核心原理
+
+- 接收一个原始组件，返回一个包装组件。
+- 包装组件在渲染时，会渲染原始组件并传入增强后的 props 或状态。
+- 通过闭包和组合，实现增强功能。
+
+### 4. HOC 简单示例
+
+```jsx
+function withLoading(WrappedComponent) {
+  return function WithLoadingComponent({ isLoading, ...props }) {
+    if (isLoading) {
+      return <div>Loading...</div>;
+    }
+    return <WrappedComponent {...props} />;
+  };
+}
+```
+
+### 5. HOC 使用场景
+
+- 权限校验：包装组件根据权限控制渲染内容。
+- 数据获取：包装组件在挂载时请求数据，传递给原始组件。
+- 事件处理：统一处理某些事件逻辑。
+- 性能优化：例如缓存渲染结果。
+
+### 6. 面试常见问题
+
+- **HOC 与 Render Props 区别？**
+  - HOC 是通过函数接受组件并返回新组件，Render Props 是通过一个函数作为子组件提供渲染内容。
+- **HOC 如何避免命名冲突？**
+  - 使用 `hoist-non-react-statics` 库拷贝静态属性，避免丢失原组件静态方法。
+- **HOC 如何传递 refs？**
+  - 需要用 `React.forwardRef` 来转发 ref，否则 ref 指向的是包装组件而非被包裹组件。
+
+### 7. HOC 的缺点
+
+- 组件树嵌套层级增加（“Wrapper Hell”）。
+- 调试时组件层级复杂。
+- 不支持使用 Hook（HOC 本身是函数，Hook 只能在函数组件里使用）。
