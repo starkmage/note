@@ -33,13 +33,13 @@ requestAnimationFrame((timestamp) => {
 
 # Proxy对象
 
-## 🔍 什么是 `Proxy`？
+🔍 什么是 `Proxy`？
 
 > `Proxy` 是 ES6 引入的原生对象，用于**创建一个对象的代理**，从而可以拦截和自定义对象的基本操作（如读取属性、赋值、函数调用等）。
 
 ------
 
-## 🧠 核心语法
+🧠 核心语法
 
 ```js
 const proxy = new Proxy(target, handler);
@@ -50,7 +50,7 @@ const proxy = new Proxy(target, handler);
 
 ------
 
-## 🔧 常用的拦截操作（trap）
+🔧 常用的拦截操作（trap）
 
 | trap 名称        | 拦截行为               | 示例                     |
 | ---------------- | ---------------------- | ------------------------ |
@@ -63,7 +63,7 @@ const proxy = new Proxy(target, handler);
 
 ------
 
-## ✅ 示例 1：拦截对象属性读取和写入
+✅ 示例 1：拦截对象属性读取和写入
 
 ```js
 const user = { name: "Tom", age: 25 };
@@ -86,7 +86,7 @@ proxyUser.age = 30;      // 控制台：设置属性: age = 30
 
 ------
 
-## ✅ 示例 2：数组保护
+✅ 示例 2：数组保护
 
 ```js
 const list = [1, 2, 3];
@@ -106,7 +106,7 @@ console.log(safeList[99]); // undefined，而不是抛错
 
 ------
 
-## ✅ 示例 3：函数防抖（函数代理 + apply）
+✅ 示例 3：函数防抖（函数代理 + apply）
 
 ```js
 function search() {
@@ -125,7 +125,7 @@ window.addEventListener("input", debouncedSearch);
 
 ------
 
-## ✅ 示例 4：构造函数代理（拦截 new）
+✅ 示例 4：构造函数代理（拦截 new）
 
 ```js
 class Person {
@@ -146,7 +146,7 @@ const p = new PersonProxy("Alice"); // 控制台：正在创建实例: ["Alice"]
 
 ------
 
-## 🎯 Proxy 常见用途总结
+🎯 Proxy 常见用途总结
 
 | 用途            | 示例                                    |
 | --------------- | --------------------------------------- |
@@ -159,13 +159,13 @@ const p = new PersonProxy("Alice"); // 控制台：正在创建实例: ["Alice"]
 
 ------
 
-## 🧠 面试建议回答方式
+🧠 面试建议回答方式
 
 > Proxy 是我比较喜欢的一个特性，在项目中我用它做过接口缓存、访问控制、防抖包装，还模拟过前端 mock 接口返回。它相比 Object.defineProperty 更灵活，支持函数、数组、构造器等的拦截。
 
 ------
 
-## ⚠️ 注意事项
+⚠️ 注意事项
 
 - `Proxy` 是**不可 polyfill 的**，只能在支持 ES6 的环境使用。
 - Proxy 性能开销稍高，不建议对大量数据长链式访问场景使用。
@@ -337,17 +337,17 @@ V8 JavaScript 引擎线程（JS 引擎线程）:
 
 # requestIdleCallback是什么
 
-`requestIdleCallback` 是浏览器提供的一个 API，用于 **在浏览器主线程空闲时执行非关键任务**，不会阻塞页面渲染。它适合处理那些**可延迟执行、非紧急的任务**，比如预加载数据、日志上报、懒初始化等。
+`requestIdleCallback` 是浏览器提供的一个 API，是**浏览器调度的低优先级宏任务**，用于 **在浏览器主线程空闲时执行非关键任务**，不会阻塞页面渲染。它适合处理那些**可延迟执行、非紧急的任务**，比如预加载数据、日志上报、懒初始化等。
 
 ------
 
-### ✅ 一句话理解
+✅ 一句话理解
 
 > `requestIdleCallback` 让你“等浏览器空了再说”，不会影响用户交互和渲染性能。
 
 ------
 
-### 📦 基本用法
+📦 基本用法
 
 ```js
 requestIdleCallback((deadline) => {
@@ -359,7 +359,7 @@ requestIdleCallback((deadline) => {
 
 ------
 
-### 参数解释
+参数解释
 
 回调函数接收一个 `IdleDeadline` 对象，包含：
 
@@ -370,7 +370,7 @@ requestIdleCallback((deadline) => {
 
 ------
 
-### 🧪 示例：空闲时加载图片
+🧪 示例：空闲时加载图片
 
 ```js
 requestIdleCallback((deadline) => {
@@ -384,7 +384,7 @@ requestIdleCallback((deadline) => {
 
 ------
 
-### ⏱ 可选参数：`timeout`
+⏱ 可选参数：`timeout`
 
 ```js
 requestIdleCallback(callback, { timeout: 2000 });
@@ -394,7 +394,7 @@ requestIdleCallback(callback, { timeout: 2000 });
 
 ------
 
-### 🔁 对比 `setTimeout`
+🔁 对比 `setTimeout`
 
 | 特点             | `requestIdleCallback`  | `setTimeout`         |
 | ---------------- | ---------------------- | -------------------- |
@@ -404,7 +404,7 @@ requestIdleCallback(callback, { timeout: 2000 });
 
 ------
 
-### ⚠️ 浏览器兼容性
+⚠️ 浏览器兼容性
 
 - 支持度：仅现代浏览器（Chrome、Edge 支持，**Safari 不支持**，部分 Firefox 支持）
 - 可以用 polyfill 替代：
@@ -423,9 +423,149 @@ window.requestIdleCallback = window.requestIdleCallback || function (cb) {
 
 ------
 
-### 🔧 实际应用场景
+🔧 实际应用场景
 
 - ✅ 懒加载非首屏图片
 - ✅ 首屏渲染后上报日志或打点
 - ✅ 低优先级的缓存预热
 - ✅ 富文本编辑器初始化大量按钮或模块
+
+------
+
+# Web Worker和Service Worker
+
+`Web Worker` 和 `Service Worker` 是浏览器中用于 **多线程处理** 的两种不同的 Web API，它们的设计初衷和使用场景不同，但都可以在不阻塞主线程的情况下提升 Web 应用的性能与响应速度。
+
+## 一、Web Worker
+
+✅ 定义：
+
+Web Worker 允许你在主线程之外运行 JavaScript 脚本，即 **在后台线程中执行代码**，避免阻塞 UI。
+
+✅ 特点：
+
+- 只能与主线程通过 `postMessage` 通信（消息传递方式）
+- 没有 DOM 访问权限
+- 适合进行 CPU 密集型任务，如大计算、解析等
+- 生命周期随页面走（页面关闭就结束）
+
+✅ 示例：
+
+```js
+// main.js
+const worker = new Worker('worker.js');
+worker.postMessage('start'); // 发送消息给 Worker
+
+worker.onmessage = function(e) {
+  console.log('Message from worker:', e.data);
+};
+
+// worker.js
+onmessage = function(e) {
+  if (e.data === 'start') {
+    let sum = 0;
+    for (let i = 0; i < 1e8; i++) sum += i;
+    postMessage(sum); // 把结果发送回主线程
+  }
+};
+```
+
+------
+
+## 二、Service Worker
+
+✅ 定义：
+
+Service Worker 是一种 **可拦截网络请求并进行缓存控制的独立线程**，运行在浏览器后台，用于实现离线缓存、资源预取、消息推送等功能。
+
+✅ 特点：
+
+- 工作于浏览器和网络之间，类似一个代理服务器
+- 生命周期与页面无关（即使页面关闭，Service Worker 仍可运行）
+- 有访问 Cache API、Fetch API 的能力
+- 主要用于离线应用、缓存优化、消息推送（如 PWA）
+
+✅ 生命周期流程：
+
+1. `register`：注册 Service Worker
+2. `install`：下载和安装
+3. `activate`：激活旧的 Worker 版本
+4. 拦截请求 `fetch`：缓存或响应资源
+
+✅ 示例：
+
+```js
+// main.js
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(reg => console.log('Service Worker 注册成功'))
+    .catch(err => console.error('注册失败:', err));
+}
+
+// sw.js
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open('my-cache').then(cache => cache.add('/index.html'))
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(resp => resp || fetch(event.request))
+  );
+});
+```
+
+------
+
+## 三、对比总结：
+
+| 项目         | Web Worker         | Service Worker            |
+| ------------ | ------------------ | ------------------------- |
+| 工作线程     | 后台线程           | 浏览器后台线程            |
+| 与主线程关系 | 通信式交互         | 不直接与 DOM 或主线程交互 |
+| 生命周期     | 随页面生命周期     | 独立于页面，支持持久化    |
+| 是否拦截请求 | ❌                  | ✅ 可以拦截并处理 fetch    |
+| 是否访问 DOM | ❌                  | ❌                         |
+| 适用场景     | 大量计算、耗时逻辑 | 离线缓存、PWA、消息推送   |
+
+------
+
+## 四、面试建议
+
+Q: Web Worker 和 Service Worker 有哪些异同？
+
+答：
+
+- 相同点：都运行在主线程之外，不能访问 DOM，通过 `postMessage` 进行通信。
+- 不同点：
+  - Web Worker 用于**计算密集型任务**；
+  - Service Worker 用于**网络代理、缓存管理、离线能力**，运行在浏览器后台。
+
+# IntersectionObserver vs scroll 事件监听
+
+在现代浏览器API中，IntersectionObserver的观察intersecting状态（即检测元素相交变化的过程）是在Compositor Thread（合成线程）完成的，而非Main Thread（主线程）。这设计是为了避免阻塞主线程，提高性能，尤其在滚动或动画场景下。
+
+例如，MDN文档中指出，这种API允许浏览器在不依赖主线程的情况下管理相交检测，从而优化性能。 不过，观察器的回调函数（callback）则会在Main Thread上执行，因此回调应尽量高效，以免影响主线程的响应。
+
+| 对比维度             | **IntersectionObserver**                           | **scroll 事件监听**                                       |
+| -------------------- | -------------------------------------------------- | --------------------------------------------------------- |
+| **触发机制**         | 由浏览器统一调度，异步触发                         | 每次滚动同步触发                                          |
+| **回调执行时机**     | 异步执行，调度在主线程的任务队列中，不会打断主流程 | 同步执行，立即在主线程中触发                              |
+| **执行线程**         | 主线程（由浏览器在 layout 阶段进行交叉检测）       | 主线程                                                    |
+| **是否阻塞主线程**   | ❌ 回调不会阻塞（异步） ❗️但交叉检测依赖 layout 阶段 | ✅ 回调同步执行，**可能阻塞**主线程                        |
+| **是否依赖 layout**  | ✅ 是，浏览器在每帧 layout 时判断是否交叉           | 不依赖 layout 本身，只要发生滚动就触发                    |
+| **是否频繁触发**     | ❌ 不频繁，只有交叉状态发生变化才触发               | ✅ 非常频繁，每次滚动都会触发（即使没变化）                |
+| **是否支持节流**     | ✅ 浏览器自动节流调度                               | ❌ 手动使用 `throttle` 或 `requestAnimationFrame` 才能优化 |
+| **适合场景**         | - 懒加载图片 - 元素曝光统计 - 页面进入动画等       | - 精确响应滚动位置 - 滚动进度条 - 无限滚动                |
+| **是否支持 passive** | 🚫 不适用（没有 preventDefault）                    | ✅ 推荐 `{ passive: true }` 提高滚动性能                   |
+| **对合成线程的依赖** | ❌ 不依赖，交叉检测在主线程完成                     | ❌ 不依赖，主线程完成处理                                  |
+
+`passive: true` **不会改变 `scroll` 回调是同步执行的本质**，但它**允许浏览器提前滚动页面**，不会被 JS 回调“阻塞滚动行为”。
+
+| 特性                          | `passive: false`（默认） | `passive: true`    |
+| ----------------------------- | ------------------------ | ------------------ |
+| 回调是否仍然同步执行          | ✅ 是                     | ✅ 是               |
+| 浏览器是否等回调执行完再滚动  | ✅ 是                     | ❌ 否（可直接滚动） |
+| 是否能调用 `preventDefault()` | ✅ 可以                   | ❌ 不可以           |
+| 是否能优化滚动性能            | ❌ 否                     | ✅ 是               |
