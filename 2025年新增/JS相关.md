@@ -569,3 +569,37 @@ Q: Web Worker 和 Service Worker 有哪些异同？
 | 浏览器是否等回调执行完再滚动  | ✅ 是                     | ❌ 否（可直接滚动） |
 | 是否能调用 `preventDefault()` | ✅ 可以                   | ❌ 不可以           |
 | 是否能优化滚动性能            | ❌ 否                     | ✅ 是               |
+
+# class，怎么可以通过size拿属性，而不是size()
+
+**使用 Getter（推荐）**
+
+在 `class` 中使用 `get` 关键字定义一个 **getter**，这样 `size` 会像属性一样被访问：
+
+**示例代码**
+
+```js
+class MyCollection {
+  constructor() {
+    this._items = []; // 内部存储数据
+  }
+
+  // 定义 getter，允许通过 .size 访问
+  get size() {
+    return this._items.length;
+  }
+
+  // 其他方法
+  add(item) {
+    this._items.push(item);
+  }
+}
+
+// 使用示例
+const collection = new MyCollection();
+collection.add(1);
+collection.add(2);
+collection.add(3);
+
+console.log(collection.size); // 3（不是 collection.size()）
+```
