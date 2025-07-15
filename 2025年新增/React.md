@@ -324,3 +324,491 @@ function withLoading(WrappedComponent) {
 - 组件树嵌套层级增加（“Wrapper Hell”）。
 - 调试时组件层级复杂。
 - 不支持使用 Hook（HOC 本身是函数，Hook 只能在函数组件里使用）。
+
+# 官方为什么要把React分成react和react-dom两个库
+
+# React一次渲染时是怎么判断要进入到提交阶段了
+
+React 在一次更新（render）中，**判断是否从“协调阶段”（Reconciliation）进入“提交阶段”（Commit）**的核心，是看：
+
+> 🔍 是否生成了一个“有变更的 Fiber 树” —— 即 Work-in-Progress Fiber 树中是否包含 effect（副作用）标记。
+
+------
+
+🧠 背景知识
+
+React 的更新过程可分为两个主要阶段：
+
+| 阶段                     | 特点                                                         |
+| ------------------------ | ------------------------------------------------------------ |
+| 协调阶段（Render Phase） | 构建新 Fiber 树，进行 diff，标记变化（effectTag），是**可中断**的 |
+| 提交阶段（Commit Phase） | 应用所有变更到真实 DOM，调用生命周期等，是**不可中断**的     |
+
+------
+
+✅ 判断是否进入提交阶段的关键逻辑
+
+React 内部在构建完 Work-in-Progress Fiber 树后，会检查是否存在副作用（即变化）。如果有，就进入提交阶段。
+
+👇 具体表现：
+
+1. **在协调阶段：**
+   - React 会遍历整个 Fiber 树，执行组件的 render 函数，构建新的子树结构。
+   - 在构建过程中，每个节点如果发生了变化（比如 DOM 更新、ref 变化、副作用 hook 等），都会被打上一个 effect 标记（如 `Placement`, `Update`, `Deletion` 等）。
+2. **协调结束后：**
+   - 如果根节点 `root.finishedWork` 上有副作用（`root.finishedWork.flags !== NoFlags || root.finishedWork.subtreeFlags !== NoFlags`），则进入提交阶段。
+   - 如果没有任何副作用，React 会跳过提交阶段（即不触发 DOM 更新，不调用副作用 hook）。
+
+**在React 18+的并发模式下，协调可能被中断多次，但只有在整个Fiber树的副作用收集完成后才会真正进入提交阶段。提交阶段本身是同步不可中断的，这是React保证UI一致性的关键设计。**
+
+# 如果一个回调函数任务很多，有几千行逻辑要执行
+
+如果一个回调函数（比如在 React 中的某个事件处理函数、Effect 回调或更新调度函数）**本身逻辑很长、有几千行代码需要执行**，React 本身是**不会自动拆分这段任务的**，那么它会产生以下几个影响和应对策略：
+
+------
+
+🧨 问题：长任务的影响
+
+1. **阻塞主线程**
+
+- JS 是单线程的，这几千行代码执行期间：
+  - 浏览器不能响应用户交互（如点击、滚动）。
+  - 页面会“卡住”或掉帧。
+  - UI 更新延迟，React 的调度优先级机制也被阻断。
+
+2. **打断调度机制**
+
+- 在 React 18 的并发模式下，协调阶段可以被打断（利用时间分片机制 `Scheduler` + `MessageChannel`）。
+- 但如果你在某个任务中执行了巨量逻辑，**React 的调度也无法插入**，造成帧丢失或“长任务”（> 50ms）。
+
+**✅ 最佳实践**
+
+1. **优先拆分长任务**（`setTimeout`、`queueMicrotask`）。
+2. **纯计算任务 → Web Worker**。
+3. **React 18+ → `useTransition`或 `useDeferredValue`**。
+4. **避免同步长任务**，否则 UI 会卡顿。
+
+------
+
+**结论**
+
+如果回调函数有**几千行同步逻辑**，React **不会自动优化**，必须手动拆分任务或使用 Web Workers，否则会阻塞渲染。React 18 的并发模式（`useTransition`）能部分缓解问题，但最佳方案仍是**减少主线程计算量**。
+
+# React的事件绑定机制
+
+## 一道题目
+
+```react
+const App = () => {
+  const handleClick = () => {
+    console.log('react写的')
+  }
+
+  return <div>
+    <div id='a' onClick={handleClick}>Button</div>
+  </div>
+}
+```
+
+这个Button的dom，在浏览器控制台获取通过选择器获取后，通过addEventListener给他加上一个新的click回调，比如console.log('浏览器改的')，点击Button会发生什么.
+
+```js
+const element = document.querySelector('#a'); 
+element.addEventListener('click', () => {  console.log('浏览器改的'); });
+```
+
+**答案：**
+
+```
+浏览器改的
+react写的
+```
+
+**原因：**
+
+React 里 `<div onClick={handleClick}>` 实际上会**通过事件委托机制**，将 click 事件绑定在根容器（`#root`）上，而不是直接绑定在这个 `div` 上。
+
+🔁 点击时发生了什么？
+
+当你点击 `<div>Button</div>` 时：
+
+1. **浏览器原生事件捕获/冒泡流程开始**
+2. 点击事件冒泡到这个元素时：
+   - 会先触发这个 `div` 上用 `addEventListener` 加的监听器（`console.log('浏览器改的')`）
+3. 然后事件继续冒泡，传到 React 挂载的容器元素（如 `#root`）上：
+   - React 的合成事件系统捕捉到事件，在对应组件上查找是否注册了 `onClick` 事件，有就触发 `handleClick`，打印 `'react写的'`
+
+------
+
+🧠 简单说：
+
+- 原生事件监听器是直接绑定在 DOM 上的，会优先触发
+- React 的事件绑定是“委托”在 `root` 上，是**后触发的**
+
+## React 是如何实现事件委托和合成事件系统
+
+React 的事件系统是它最核心的机制之一，它使用**事件委托（Event Delegation）+ 合成事件（SyntheticEvent）\**实现了一套\**跨浏览器一致、可中断、优先级可控**的事件系统。
+
+下面我会从整体到细节为你展开讲解：
+
+------
+
+🧭 一句话总结：
+
+> React 并不是把 `onClick` 直接绑定到每个 DOM 元素上，而是统一绑定到容器（比如 `#root`）上，通过事件冒泡，捕获事件，再派发给对应组件的回调函数。这就是**事件委托**。
+>  同时 React 会用一套自己的 `SyntheticEvent` 包装原生事件，这就是**合成事件系统**。
+
+------
+
+### ✅ React 事件系统架构全景
+
+🌳 事件委托模型：
+
+| 特性     | 说明                                                         |
+| -------- | ------------------------------------------------------------ |
+| 委托对象 | React 会在 `root` 容器上只绑定一次事件监听器（如 `click`, `input`, `keydown` 等） |
+| 原理     | 依赖浏览器的事件冒泡模型                                     |
+| 优势     | 减少事件绑定数量，提高性能；支持事件优先级、调度中断等高级控制 |
+
+🎭 合成事件系统（SyntheticEvent）：
+
+| 特性         | 说明                                                         |
+| ------------ | ------------------------------------------------------------ |
+| 包装原生事件 | React 创建一个 `SyntheticEvent` 实例，它包装了浏览器原生事件对象 |
+| 跨浏览器兼容 | 提供统一的事件属性和方法（如 `event.target`, `stopPropagation`, `preventDefault`） |
+| 可回收       | React 会复用事件对象，提高性能（通过“事件池”机制）           |
+
+------
+
+🔄 生命周期：一次事件是如何在 React 中被处理的？
+
+以下是点击事件的处理流程：
+
+```jsx
+<div onClick={handleClick}>Click Me</div>
+```
+
+步骤如下：
+
+------
+
+1️⃣ React 初始化时绑定全局事件监听器
+
+```js
+// ReactDOM 会在 root container 上注册监听器
+container.addEventListener('click', dispatchEvent, false)
+```
+
+> 这个监听器是一次性的，所有 `onClick` 都通过这一个入口进来。
+
+------
+
+2️⃣ 用户点击 DOM 元素 → 浏览器触发原生事件 → 冒泡到容器上
+
+- 浏览器触发原生 `click` 事件
+- 事件冒泡到 `#root` 容器
+- 被 React 的 `dispatchEvent()` 捕获
+
+------
+
+3️⃣ React 执行 dispatchEvent → 开始事件派发流程
+
+React 内部主要函数是：
+
+```ts
+dispatchEventForPluginEventSystem(
+  domEventName,      // 如 'click'
+  eventSystemFlags,  // 标记 phase 类型（冒泡 / 捕获）
+  nativeEvent,       // 原生事件对象
+  target             // 事件目标 DOM
+)
+```
+
+------
+
+4️⃣ React 从事件目标 Fiber 节点向上“冒泡”寻找事件回调
+
+> React 事件系统会构建一条 Fiber 节点链，从目标 Fiber 一直向上走到 root，查找是否有 `onClick`。
+
+```ts
+accumulateTwoPhaseListeners(targetFiber, 'onClick') // 收集冒泡和捕获监听器
+```
+
+------
+
+5️⃣ 创建 SyntheticEvent 并派发回调
+
+```ts
+const syntheticEvent = createSyntheticEvent(nativeEvent)
+listener(syntheticEvent)
+```
+
+> `syntheticEvent` 是合成事件对象，具有 `persist()`, `stopPropagation()`, `preventDefault()` 等方法。
+
+------
+
+6️⃣ 调用你的回调函数
+
+```ts
+const handleClick = (e) => {
+  console.log('react写的')
+  e.stopPropagation()
+  e.preventDefault()
+}
+```
+
+> React 会用你写的函数去调用收集到的监听器队列。
+
+------
+
+### 💡 React 合成事件的核心实现原理
+
+✅ 创建 SyntheticEvent 实例：
+
+```ts
+function createSyntheticEvent(nativeEvent) {
+  const syntheticEvent = {
+    nativeEvent,
+    currentTarget: null,
+    stopPropagation: () => nativeEvent.stopPropagation(),
+    preventDefault: () => nativeEvent.preventDefault(),
+    // ...
+  };
+  return syntheticEvent;
+}
+```
+
+------
+
+✅ 为什么要用合成事件？
+
+| 原因                | 好处                                              |
+| ------------------- | ------------------------------------------------- |
+| 跨浏览器兼容        | React 抹平 IE、Chrome、Firefox 的事件行为差异     |
+| 支持事件池回收      | 性能优化，避免频繁创建新对象（React 17 以前启用） |
+| 支持优先级调度      | 可集成到调度系统中，如高优任务中断、延迟处理      |
+| 可中断 & 批处理更新 | 支持异步调度和 `flushSync` 控制更新粒度           |
+
+------
+
+### 🧠 React 17+ 变了什么？
+
+- **事件绑定不再统一绑到 root 上**，而是绑定在事件目标容器上（例如你调用 `ReactDOM.render` 的那个 DOM）
+- 合成事件仍保留，只是绑定更局部
+
+### 🧠 延伸理解：React 18 中的 `createRoot`
+
+如果你用的是 React 18：
+
+```js
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+```
+
+> 那绑定事件监听器的仍然是你传入的那个 DOM —— `document.getElementById('root')`。
+
+------
+
+### 🎯 小结图（逻辑流程）
+
+```
+原生事件触发
+       ↓
+冒泡到 React 容器 DOM
+       ↓
+React 捕捉并执行 dispatchEvent
+       ↓
+构建 Fiber 冒泡路径，收集监听器
+       ↓
+创建 SyntheticEvent
+       ↓
+依次执行你的事件回调
+```
+
+------
+
+如果你想进一步了解调度优先级、事件批处理等我也可以展开，比如：
+
+- React 是如何处理多个事件之间的 flush
+- 如何实现事件优先级（比如 Input 比 MouseMove 更重要）
+- React 事件系统与 Scheduler 的集成
+
+## React里stopPropagation和preventDefault作用和原理
+
+这是一个非常核心的 React 事件机制问题，我们来系统解释：
+
+------
+
+🎯 简答版：
+
+| 方法                | 作用                                           |
+| ------------------- | ---------------------------------------------- |
+| `stopPropagation()` | 阻止事件冒泡到更高层级（如父组件）             |
+| `preventDefault()`  | 阻止浏览器的默认行为（比如表单提交、链接跳转） |
+
+React 中的这两个方法，**作用与原生 DOM 是一样的**，但实现上是通过 **合成事件（SyntheticEvent）封装** 的。
+
+------
+
+🧠 合成事件回顾
+
+在 React 里事件是被封装成了 `SyntheticEvent`（合成事件）的：
+
+```js
+const handleClick = (e) => {
+  e.stopPropagation();
+  e.preventDefault();
+}
+```
+
+这个 `e` **不是原生 DOM 事件对象**，而是 React 构造的合成事件实例（`SyntheticEvent`），它会在内部调用原生事件的方法来达到相同目的。
+
+------
+
+🔎 详细解释和原理
+
+### ✅ `preventDefault()`：阻止默认行为
+
+例如：
+
+```js
+<a href="https://example.com" onClick={(e) => e.preventDefault()}>
+  Click me
+</a>
+```
+
+👆 阻止了 `<a>` 标签跳转页面的默认行为。
+
+🌟 React 实现：
+
+```js
+e.preventDefault()
+```
+
+内部实际上是这样的：
+
+```js
+preventDefault() {
+  this.defaultPrevented = true;
+  const event = this.nativeEvent;
+  if (event.preventDefault) {
+    event.preventDefault();
+  } else {
+    event.returnValue = false; // IE fallback
+  }
+}
+```
+
+> 也就是说，**它调用了原生事件的 `preventDefault` 方法**，完全等效于 DOM 的行为。
+
+------
+
+### ✅ `stopPropagation()`：阻止冒泡传播
+
+比如：
+
+```js
+<div onClick={() => console.log('parent')}>
+  <button onClick={(e) => {
+    e.stopPropagation();
+    console.log('child');
+  }}>Click</button>
+</div>
+```
+
+点击按钮时只输出 `child`，不会输出 `parent`，因为冒泡被阻断了。
+
+🌟 React 实现：
+
+```js
+stopPropagation() {
+  const event = this.nativeEvent;
+  if (event.stopPropagation) {
+    event.stopPropagation();
+  }
+  this.isPropagationStopped = true;
+}
+```
+
+> React 会记录一个标志 `isPropagationStopped`，在事件系统内部检查这个标志来决定是否继续执行父节点的回调。
+
+------
+
+### ⚠️ 注意：React 的 `stopPropagation` 不一定影响原生事件监听器
+
+React 的事件系统是在冒泡阶段中**模拟自己的事件冒泡流程**，所以：
+
+```js
+// 原生监听器
+document.getElementById('root').addEventListener('click', () => {
+  console.log('原生事件');
+});
+
+// React 监听器
+<div onClick={(e) => e.stopPropagation()}></div>
+```
+
+👆 `stopPropagation()` 只能阻止 React 的事件传播，不会阻止**原生绑定在 DOM 上的事件监听器**。
+
+你要让原生事件也阻止，得这样做：
+
+```js
+e.nativeEvent.stopPropagation();
+```
+
+------
+
+### ✅ 小结
+
+| 方法                | React 封装方式                                   | 是否影响原生事件            |
+| ------------------- | ------------------------------------------------ | --------------------------- |
+| `preventDefault()`  | 包装并调用原生 `preventDefault()`                | ✅ 有效                      |
+| `stopPropagation()` | 包装并调用原生 `stopPropagation()`，并设置标志位 | 🚫 默认不会阻止原生 DOM 事件 |
+| `e.nativeEvent`     | 可以访问原生事件对象                             | ✅ 可调用原生 API            |
+
+------
+
+🎁 延伸：事件穿透与停止的顺序逻辑
+
+React 合成事件会：
+
+- 在你调用 `e.stopPropagation()` 时，停止在 React 的 Fiber 冒泡链上传播
+- 但**不影响原生 `addEventListener` 的事件继续触发**（除非你调用的是 `e.nativeEvent.stopPropagation()`）
+
+------
+
+如果你想我画个图解释 React 如何在 Fiber 节点中模拟事件冒泡，我也可以继续展开。
+
+## 如果是原生HTML，上面的代码输出什么
+
+```html
+<body>
+  <button id="btn">Click</button>
+
+  <script>
+    const btn = document.getElementById('btn');
+
+    btn.onclick = () => {
+      console.log('DOM0 onclick');
+    };
+
+    btn.addEventListener('click', () => {
+      console.log('DOM2 addEventListener');
+    });
+
+
+  </script>
+</body>
+```
+
+代码所示的两个绑定方式，谁先被注册，谁先触发
+
+- **内联HTML的`onclick`属性**：
+
+  ```
+  <button onclick="console.log('Inline')">Click</button>
+  ```
+
+  这类事件的触发时机等同于直接赋值 `onClick`，且会覆盖已有的 `element.onclick`，但不会影响 `addEventListener`的监听器。**内联 `onclick`总是先于 `addEventListener`触发**（无论注册顺序）
+
+**避免混用两者**：混用可能导致执行顺序难以维护，尤其是团队协作时
