@@ -514,64 +514,9 @@ vertical-align 实现的是近似垂直居中
 
 [去除inline-block元素间间距的N种方法](https://www.zhangxinxu.com/wordpress/2012/04/inline-block-space-remove-%E5%8E%BB%E9%99%A4%E9%97%B4%E8%B7%9D/)
 
-## Vue中使用CSS-modules
+# letter-spacing和word-spacing
 
-最开始使用Vue的时候，提倡并大量使用的是scoped这种技术
-
-```vue
-<style scoped>
-    .list-container:hover {
-        background: orange;
-    }
-</style>
-```
-
-这个可选 scoped 属性会自动添加一个唯一的属性 (比如 data-v-21e5b78) 为组件内 CSS 指定作用域，编译的时候 `.list-container:hover` 会被编译成类似 `.list-container[data-v-21e5b78]:hover`
-
-```html
-<span data-v-0467f817 class="errShow">用户名不得为空</span>
-```
-
-CSS样式被编译如下
-
-``` css
-.errShow[data-v-0467f817] {
-    font-size: 12px;
-    color: red;
-}
-```
-
-但是，它并不能完全避免冲突，如果用户也定义了一个errShow类名，会影响到所有定义为errShow类名的组件的显示
-
-而CSS modules则做的更彻底，它不是添加属性，而是直接改变类名
-
-```html
-<span class="_3ylglHI_7ASkYw5BlOlYIv_0">用户名不得为空</span>
-```
-
-下面来介绍CSS modules的写法
-
-在style标签中添加module属性，表示打开CSS-loader的模块模式
-
-```vue
-<style module>
-.red {color: red;}
-</style>
-```
-
-在模板中使用动态类绑定:class，并在类名前面加上'$style.'
-
-```vue
-<template>
-  <p :class="$style.red">
-    This should be red
-  </p >
-</template>
-```
-
-如果类名包含中划线，则使用中括号语法
-
-```html
-<h4 :class="$style['header-tit']">类别推荐</h4>
-```
-
+|       **属性**       |    **作用对象**    |                        **功能**                         |               **示例**                |
+| :------------------: | :----------------: | :-----------------------------------------------------: | :-----------------------------------: |
+| **`letter-spacing`** | 字符（字母、汉字） | 控制**字符之间的间距**（增加或减少字母/汉字之间的距离） |  `letter-spacing: 2px;`→ "H e l l o"  |
+|  **`word-spacing`**  |  单词（空格分隔）  |   控制**单词之间的间距**（增加或减少单词之间的距离）    | `word-spacing: 10px;`→ "Hello  World" |
