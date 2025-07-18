@@ -692,3 +692,19 @@ console.log(a === b) // true，全局注册的 Symbol
 ```
 
 这是唯一可以通过字符串复用 Symbol 的方式。
+
+# TypeError和ReferenceError什么区别
+
+✅ 面试口语化解释（可用于回答）
+
+> - `TypeError` 是因为你**对类型做了不合适的操作**，比如对 `undefined` 访问属性、把数字当函数调用等。
+> - `ReferenceError` 则是你**用了一个根本没定义的变量**，常见于拼错变量名或变量不在作用域中。
+
+```js
+// ReferenceError: foo is not defined
+console.log(foo)    
+
+// TypeError: Cannot read properties of undefined
+const user = undefined
+console.log(user.name)
+```
