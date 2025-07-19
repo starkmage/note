@@ -708,3 +708,20 @@ console.log(foo)
 const user = undefined
 console.log(user.name)
 ```
+
+#  `isNaN` 和 `Number.isNaN` 的区别
+
+📌 差异：
+
+- `isNaN(value)` 会**先强制转换为数字**，再判断是否是 NaN → 可能误判。
+- `Number.isNaN(value)` 更严格，只在值本身是 NaN 时才返回 true。
+
+示例：
+
+```js
+console.log(isNaN('abc')); // true ❌ 错误判断
+console.log(Number.isNaN('abc')); // false ✅ 正确
+
+console.log(isNaN(NaN)); // true
+console.log(Number.isNaN(NaN)); // true
+```
