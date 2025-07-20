@@ -725,3 +725,123 @@ console.log(Number.isNaN('abc')); // false ✅ 正确
 console.log(isNaN(NaN)); // true
 console.log(Number.isNaN(NaN)); // true
 ```
+
+# 在 JavaScript 中获取一个 DOM 元素的位置（相对于视口或页面）
+
+------
+
+✅ 1. `getBoundingClientRect()` —— 相对于**视口**
+
+```js
+const element = document.querySelector('#myElement');
+const rect = element.getBoundingClientRect();
+
+console.log(rect.top, rect.left); // 元素相对于视口的距离
+```
+
+返回字段：
+
+| 属性               | 含义                                           |
+| ------------------ | ---------------------------------------------- |
+| `top` / `left`     | 元素顶部/左边 到视口顶部/左边的距离（单位 px） |
+| `bottom` / `right` | 元素底部/右边 到视口的距离                     |
+| `width` / `height` | 元素宽高                                       |
+
+------
+
+✅ 2. 获取相对于**整个文档**的坐标（考虑滚动）
+
+```js
+const rect = element.getBoundingClientRect();
+const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+const offsetTop = rect.top + scrollTop;
+const offsetLeft = rect.left + scrollLeft;
+
+console.log(offsetTop, offsetLeft); // 相对于整个页面（document）的位置
+```
+
+------
+
+✅ 3. `offsetTop` / `offsetLeft` —— 相对于**offsetParent**
+
+```js
+const top = element.offsetTop;
+const left = element.offsetLeft;
+```
+
+⚠️ 注意：这个值是**相对于其 offsetParent 的距离**，不是页面或视口。
+
+------
+
+🔍 推荐用法总结：
+
+| 目标                                     | 方法                                      |
+| ---------------------------------------- | ----------------------------------------- |
+| 获取元素相对于**视口**的位置             | `element.getBoundingClientRect()`         |
+| 获取元素相对于**页面**的位置（考虑滚动） | `getBoundingClientRect() + scroll offset` |
+| 获取元素相对于**最近的定位祖先**的位置   | `element.offsetTop / offsetLeft`          |
+
+# e.target !== ref.current和!ref.current.contains(e.target)什么区别
+
+------
+
+✅ 写法一：
+
+```
+e.target !== ref.current
+```
+
+📌 含义：
+
+- 事件目标 **严格等于 ref.current** 才为 true
+- 🚫 **不能识别子元素**
+- 只匹配 **元素本身**
+
+✅ 用于判断：
+
+是否 **点击的正是该元素本身**（不包括子元素）
+
+------
+
+✅ 写法二：
+
+```
+!ref.current.contains(e.target)
+```
+
+📌 含义：
+
+- `ref.current.contains` 是一个 **DOM API**，用于判断一个 DOM 节点是否**包含另一个节点（包括自身或子节点）**
+- 判断事件目标 `e.target` 是否**不在该元素或其子孙元素中**
+- ✅ 会识别子元素
+- 更常用于**判断点击是否发生在元素外部**
+
+✅ 用于判断：
+
+是否 **点击发生在该元素之外**
+
+------
+
+🔍 举个例子：
+
+```
+<div ref="box">
+  <button>Click me</button>
+</div>
+```
+
+点击 `<button>` 时：
+
+| 判断                              | 结果                                    |
+| --------------------------------- | --------------------------------------- |
+| `e.target !== ref.current`        | ✅ `true`，因为点击的是 button，不是 box |
+| `!ref.current.contains(e.target)` | ❌ `false`，因为 button 是 box 的子元素  |
+
+✅ 总结：
+
+| 表达式                            | 是否包含子元素 | 常用于                                               |
+| --------------------------------- | -------------- | ---------------------------------------------------- |
+| `e.target !== ref.current`        | ❌ 不包含       | 判断是否点击**元素本身**                             |
+| `!ref.current.contains(e.target)` | ✅ 包含         | 判断是否点击**元素之外**（常用于点击外部关闭弹窗等） |

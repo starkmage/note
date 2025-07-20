@@ -937,3 +937,73 @@ React 合成事件会：
   这类事件的触发时机等同于直接赋值 `onClick`，且会覆盖已有的 `element.onclick`，但不会影响 `addEventListener`的监听器。**内联 `onclick`总是先于 `addEventListener`触发**（无论注册顺序）
 
 **避免混用两者**：混用可能导致执行顺序难以维护，尤其是团队协作时
+
+# `ReactDOM.createPortal` 
+
+ React 提供的一种 **将子组件渲染到父组件 DOM 层级之外** 的方式。它用于解决一些 UI 组件需要“跳出当前组件层级”的问题，比如：
+
+- 模态框（Modal）
+- 弹窗（Dialog）
+- Tooltip
+- Toast 等浮层组件
+
+------
+
+✅ 语法
+
+```js
+ReactDOM.createPortal(children, container)
+```
+
+- `children`：要渲染的 React 元素
+- `container`：目标 DOM 节点（通常是 `document.body` 下的某个元素）
+
+------
+
+✅ 举个例子
+
+```jsx
+import ReactDOM from 'react-dom';
+
+function Modal({ children }) {
+  return ReactDOM.createPortal(
+    <div className="modal">{children}</div>,
+    document.getElementById('modal-root') // 脱离父组件 DOM
+  );
+}
+<!-- index.html -->
+<body>
+  <div id="root"></div>
+  <div id="modal-root"></div> <!-- modal 渲染在这里 -->
+</body>
+```
+
+------
+
+✅ 为什么需要 Portal？
+
+正常情况下，React 组件会被渲染在组件树下的某个位置。但像 modal、tooltip 这些浮层需要：
+
+- 脱离当前 DOM 层级（避免被 `overflow:hidden`、`z-index` 限制）
+- 放到 `body` 下面全屏展示
+- 但仍然**保留 React 的组件行为（状态、事件、context）**
+
+这时就用 `createPortal`。
+
+------
+
+✅ 特点总结
+
+| 特点                | 描述                                                     |
+| ------------------- | -------------------------------------------------------- |
+| 保持 React 生命周期 | Portal 中的组件和父组件一样有相同的生命周期和 state 管理 |
+| 渲染位置不同        | 虽然逻辑上是子组件，但渲染到了别的 DOM 节点中            |
+| 常用于              | Modal、Tooltip、Dropdown、Toast 等浮层组件               |
+
+------
+
+✅ 注意事项
+
+- `createPortal` **不改变组件的 React 层级**，只是改变了 DOM 位置
+- 仍然可以访问父组件传递的 props、context
+- 不会打破 React 的事件冒泡系统
