@@ -1007,3 +1007,82 @@ function Modal({ children }) {
 - `createPortal` **不改变组件的 React 层级**，只是改变了 DOM 位置
 - 仍然可以访问父组件传递的 props、context
 - 不会打破 React 的事件冒泡系统
+
+# React流式渲染介绍
+
+**什么是流式渲染(Streaming Rendering)**
+
+流式渲染是React 18引入的一项重要特性，它允许服务器在生成HTML时逐步"流式"发送内容到浏览器，而不是等待整个页面完全渲染后再一次性发送。
+
+**核心优势**
+
+1. **更快的首屏渲染**：浏览器可以更早开始接收和显示内容
+2. **更好的用户体验**：用户不会长时间面对空白页面
+3. **更高效的资源利用**：服务器可以并行处理多个请求
+
+**主要实现方式**
+
+1. `renderToPipeableStream` (Node.js环境)
+
+```
+import { renderToPipeableStream } from 'react-dom/server';
+
+const { pipe } = renderToPipeableStream(<App />, {
+  bootstrapScripts: ['/main.js'],
+  onShellReady() {
+    response.setHeader('Content-type', 'text/html');
+    pipe(response);
+  }
+});
+```
+
+2. `renderToReadableStream` (边缘计算/Web Streams环境)
+
+```
+import { renderToReadableStream } from 'react-dom/server';
+
+async function handler(request) {
+  const stream = await renderToReadableStream(<App />, {
+    bootstrapScripts: ['/main.js'],
+  });
+  
+  return new Response(stream, {
+    headers: { 'Content-Type': 'text/html' },
+  });
+}
+```
+
+**配合Suspense使用**
+
+流式渲染与React的Suspense组件完美配合：
+
+```
+function App() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <Comments />
+    </Suspense>
+  );
+}
+
+function Comments() {
+  const comments = use(fetchComments()); // 异步数据获取
+  return <div>{comments.map(/* ... */)}</div>;
+}
+```
+
+**实际应用场景**
+
+1. 内容密集型页面（如新闻、电商产品页）
+2. 需要大量数据加载的仪表盘
+3. 社交媒体动态页面
+4. 任何需要优化首屏性能的场景
+
+**注意事项**
+
+1. 需要现代浏览器支持
+2. 与传统SSR相比，客户端JavaScript包可能需要更复杂的处理
+3. 错误处理需要特别关注
+4. SEO优化需要额外考虑
+
+流式渲染代表了React服务端渲染的未来方向，能够显著提升大型应用的性能表现。
