@@ -1086,3 +1086,34 @@ function Comments() {
 4. SEO优化需要额外考虑
 
 流式渲染代表了React服务端渲染的未来方向，能够显著提升大型应用的性能表现。
+
+# useCallback(fn, deps)和useMemo(() => fn, deps)等价吗
+
+**实现角度**
+
+**在 React 源码中，`useCallback` 实际上是基于 `useMemo` 实现的：**
+
+```
+function useCallback(callback, deps) {
+  return useMemo(() => callback, deps);
+}
+```
+
+**性能考虑**
+
+两者在性能上没有显著差异
+
+**示例**
+
+```
+// 这两个是等价的
+const memoizedCallback = useCallback(() => {
+  doSomething(a, b);
+}, [a, b]);
+
+const memoizedCallback = useMemo(() => () => {
+  doSomething(a, b);
+}, [a, b]);
+```
+
+总结：在记忆化函数这个特定场景下，两者功能等价。
