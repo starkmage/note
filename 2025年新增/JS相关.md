@@ -845,3 +845,24 @@ e.target !== ref.current
 | --------------------------------- | -------------- | ---------------------------------------------------- |
 | `e.target !== ref.current`        | ❌ 不包含       | 判断是否点击**元素本身**                             |
 | `!ref.current.contains(e.target)` | ✅ 包含         | 判断是否点击**元素之外**（常用于点击外部关闭弹窗等） |
+
+# Set和Map的顺序问题
+
+```js
+const set = new Set()
+set.add('a')
+set.add('b')
+set.add('a')
+
+console.log(set)
+// Set(2) { 'a', 'b' }
+
+const map = new Map()
+map.set('a', 'A')
+map.set('b', 'B')
+map.set('a', 'newA')
+
+console.log(map)
+// Map(2) { 'a' => 'newA', 'b' => 'B' }
+```
+

@@ -2,6 +2,17 @@
 
 https://yuanbao.tencent.com/chat/naQivTmsDa/269418ae-a475-40e6-a140-58acc482bdbe?projectId=2f13020843e3426ab5f1fc84dfe2aa87
 
+# Grid Box和Flex Box区别
+
+| 特性       | Flexbox                      | Grid                       |
+| ---------- | ---------------------------- | -------------------------- |
+| 📏 布局维度 | 一维（行或列）               | 二维（行和列）             |
+| 📐 控制方式 | 内容驱动布局（内容决定排布） | 布局驱动内容（先设好格子） |
+| 📦 主用途   | 元素按顺序自动排列           | 复杂网格或卡片区域排布     |
+| 🧠 适合场景 | 导航栏、按钮组、横向滚动区域 | 页面整体布局、复杂卡片列表 |
+| 🧲 对齐能力 | 强，方向灵活                 | 更强，可精确控制网格区域   |
+| 🚦 布局流   | 主轴 + 交叉轴                | 明确的网格线和区域         |
+
 # CSS in JS
 
 https://yuanbao.tencent.com/chat/naQivTmsDa/4add0a54-18d7-4669-b379-072ac128b176?projectId=2f13020843e3426ab5f1fc84dfe2aa87
