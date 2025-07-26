@@ -938,6 +938,27 @@ React 合成事件会：
 
 **避免混用两者**：混用可能导致执行顺序难以维护，尤其是团队协作时
 
+**同时有capture和bubble时，capture先：**
+
+```html
+<body>
+  <button id="btn">Click</button>
+
+  <script>
+    const element = document.querySelector('#btn')
+    element.addEventListener('click', () => {
+      console.log('bubble');
+    })
+    element.addEventListener('click', () => {
+      console.log('capture');
+    }, true)
+      
+    // capture
+    // bubble
+  </script>
+</body>
+```
+
 # `ReactDOM.createPortal` 
 
  React 提供的一种 **将子组件渲染到父组件 DOM 层级之外** 的方式。它用于解决一些 UI 组件需要“跳出当前组件层级”的问题，比如：
@@ -1105,7 +1126,7 @@ function useCallback(callback, deps) {
 
 **示例**
 
-```
+```js
 // 这两个是等价的
 const memoizedCallback = useCallback(() => {
   doSomething(a, b);

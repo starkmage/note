@@ -866,3 +866,123 @@ console.log(map)
 // Map(2) { 'a' => 'newA', 'b' => 'B' }
 ```
 
+------
+
+# 什么是 Primitive Value？
+
+> 原始值是 JavaScript 中最基本、不可再分的值类型，**它们不是对象，也没有方法**。
+
+------
+
+**✅ JavaScript 中的 7 种原始类型（Primitive Types / Primitive Values）：**
+
+| 类型        | 示例            | 说明                         |
+| ----------- | --------------- | ---------------------------- |
+| `string`    | `'hello'`       | 字符串                       |
+| `number`    | `42`, `3.14`    | 所有数字，包括 NaN、Infinity |
+| `bigint`    | `123n`          | 表示任意大的整数             |
+| `boolean`   | `true`, `false` | 布尔值                       |
+| `undefined` | `undefined`     | 未定义                       |
+| `null`      | `null`          | 空值                         |
+| `symbol`    | `Symbol('id')`  | 唯一值，常用于对象属性标识   |
+
+------
+
+**❗ 特点总结：**
+
+- **不可变（immutable）**：不能改变自身的值（比如字符串拼接会返回新字符串）。
+- **不是对象**：不能添加属性或方法。
+- **比较时是值比较**：两个 `number` 值比较的是数值而不是引用。
+
+# 原生JS操作DOM的方法
+
+| 类别     | 常用方法                                       |
+| -------- | ---------------------------------------------- |
+| 查找     | `querySelector`, `getElementById`              |
+| 创建     | `createElement`, `appendChild`, `insertBefore` |
+| 删除     | `removeChild`, `remove()`                      |
+| 修改     | `innerHTML`, `textContent`, `setAttribute`     |
+| 样式类名 | `classList.add/remove`                         |
+| 事件     | `addEventListener`                             |
+| 位置尺寸 | `getBoundingClientRect`, `offsetWidth`         |
+
+# children和childNodes什么区别
+
+| 特性        | `children`                   | `childNodes`                            |
+| ----------- | ---------------------------- | --------------------------------------- |
+| 类型        | 返回 **元素节点**（Element） | 返回 **所有子节点**（包括文本、注释等） |
+| 返回类型    | `HTMLCollection`（类数组）   | `NodeList`（类数组）                    |
+| 空白/换行符 | 会被忽略                     | 会被保留为文本节点                      |
+| 可读性      | 更适合操作实际 HTML 元素     | 更底层、真实地反映所有 DOM 子节点       |
+
+------
+
+📌 举例说明
+
+```
+<div id="box">
+  <p>Hello</p>
+  World
+  <!-- comment -->
+  <span>Bye</span>
+</div>
+```
+
+JS:
+
+```
+const box = document.getElementById('box');
+
+console.log(box.children);
+// [<p>Hello</p>, <span>Bye</span>]  —— 只包含元素节点
+
+console.log(box.childNodes);
+// [<p>Hello</p>, #text, #comment, <span>Bye</span>] —— 全部子节点，包括文本和注释
+```
+
+# `HTMLCollection` 和 `NodeList` 都是类数组，区别在哪里
+
+| 特性                  | `HTMLCollection`                                        | `NodeList`                                                 |
+| --------------------- | ------------------------------------------------------- | ---------------------------------------------------------- |
+| 来源                  | DOM 方法如 `element.children`、`getElementsByTagName()` | DOM 方法如 `childNodes`、`querySelectorAll()`              |
+| 包含内容              | **只包含元素节点（Element）**                           | 包含所有节点（元素、文本、注释）或只包含元素（视方法而定） |
+| 是否实时动态（live）  | ✅ 是实时的（Live）                                      | ❌ 通常是静态的（Static）                                   |
+| 可通过下标访问        | ✅ 支持                                                  | ✅ 支持                                                     |
+| 是否真的数组（Array） | ❌ 不是，不能用数组方法                                  | ❌ 不是，但可以转换为数组使用                               |
+| 转数组方法            | `Array.from()` 或 `[...collection]`                     | 同左                                                       |
+
+------
+
+🧪 举个例子
+
+```
+<ul id="list">
+  <li>Item 1</li>
+  <li>Item 2</li>
+</ul>
+
+const ul = document.getElementById('list');
+
+// HTMLCollection 示例（实时的）
+const htmlCollection = ul.getElementsByTagName('li');
+
+// NodeList 示例（静态的）
+const nodeList = ul.querySelectorAll('li');
+
+// 添加一个新元素
+const newLi = document.createElement('li');
+newLi.textContent = 'Item 3';
+ul.appendChild(newLi);
+
+console.log(htmlCollection.length); // ✅ 会变成 3，实时更新
+console.log(nodeList.length);       // ❌ 还是 2，不会变
+```
+
+------
+
+📌 NodeList 是不是一定静态？
+
+- `querySelectorAll()` 返回的 `NodeList` 是**静态的**
+- `childNodes` 返回的 `NodeList` 是**动态的**
+
+✔ 所以是否“实时”还要看**API 来源**
