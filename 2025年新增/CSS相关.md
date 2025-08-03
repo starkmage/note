@@ -23,7 +23,7 @@ https://yuanbao.tencent.com/chat/naQivTmsDa/4add0a54-18d7-4669-b379-072ac128b176
 
 ✅ 简明回答：
 
-> **DOM 大小（如 width、height、padding、border）改变，会引起 \*重排（reflow）\* 和 \*重绘（repaint）\*。**
+> **DOM 大小（如 width、height、padding、border）改变，会引起 重排（reflow）和 重绘（repaint）\*。**
 
 ------
 

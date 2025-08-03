@@ -58,7 +58,7 @@ function UpdateName() {
 
 ✅ 一句话解释
 
-> `useOptimistic` 让你**同步更新 UI 状态**，**异步请求结果返回后自动合并**，适合表单提交、点赞等需要“立即响应”的场景。
+> `useOptimistic` 让你**同步更新 UI 状态**，**异步请求结果返回后自动合并**，适合表单提交、点赞等需要“立即响应”的场景。`useOptimistic` 只在你触发 server action（如 form 的 action 提交或 useFormState/useFormStatus）时才有效。
 
 ------
 
@@ -161,10 +161,6 @@ export default function Comments() {
 🧠 面试怎么说？
 
 > `useOptimistic` 是 React 18.3 新增的状态管理 Hook，用于实现乐观 UI 更新。它通过局部更新函数让 UI 能立即响应用户操作，等后端响应后再自动对状态做真实同步，提升用户体验。
-
-------
-
-如果你想看“点赞按钮”“分页列表加载”等其他场景的 useOptimistic 示例，我可以继续帮你写 👇是否需要？
 
 ### useActionState
 

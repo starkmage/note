@@ -31,6 +31,10 @@ requestAnimationFrame((timestamp) => {
 });
 ```
 
+另外注意一个地方：
+
+`requestAnimationFrame` **只会执行一次你注册的回调函数**，**不会自动每帧重复执行**，除非你在回调函数中**再次调用它自己**，才能达到类似setInterval的效果。
+
 # Proxy对象
 
 🔍 什么是 `Proxy`？
@@ -238,7 +242,16 @@ const p = new PersonProxy("Alice"); // 控制台：正在创建实例: ["Alice"]
 | **事件触发线程**                             | 来自网络、输入、用户操作等事件从这里进入主线程的事件循环。   |
 | **线程池（例如 Fetch、Promise、Web APIs）**  | 浏览器内部线程池处理异步任务，如网络请求、异步 I/O。         |
 
-------
+**Q: Why are DOM parsing and JavaScript execution placed on the same main thread and set to be mutually exclusive in the browser?**
+
+**A:**
+
+Browsers place DOM parsing and JavaScript execution on the same main thread and make them mutually exclusive in order to ensure consistency and safety.
+
+✅ This design allows JavaScript to synchronously and safely read or modify the latest DOM structure.
+ 🚫 It prevents potential issues where JavaScript modifies the DOM while it is still being parsed, which could otherwise lead to inconsistent states, rendering errors, or even browser crashes.
+
+This mutual exclusion helps maintain a predictable execution model and simplifies development by avoiding thread synchronization problems.
 
 ## 三、渲染流程：线程参与关系
 

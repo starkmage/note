@@ -2,6 +2,44 @@
 
 https://yuanbao.tencent.com/chat/naQivTmsDa/e8d99773-3712-4504-9710-e55e1f7e6fc1?projectId=2f13020843e3426ab5f1fc84dfe2aa87
 
+# 关于React Fiber任务可暂停的粒度
+
+在 React Fiber 的渲染过程中，**不同 Fiber 节点之间可以暂停**（通过时间切片和优先级调度），但**同一个 Fiber 节点内部的多个 Hook 调用是不可暂停的**。
+
+------
+
+**为什么 Fiber 节点之间可以暂停？**
+
+Fiber 的增量渲染以**单个 Fiber 节点**为任务分片单位：
+
+- **协调阶段（Reconciliation  Phase）**：
+
+  React 按 `child → sibling → return`的顺序遍历 Fiber 树，每处理完一个 Fiber 节点后，会检查剩余时间片（默认 5ms）。若时间不足，则暂停并记录当前节点，下次恢复时继续处理下一个节点。
+
+  **剩余时间是什么？**
+
+  “剩余时间是指浏览器主线程在当前帧（通常为 16.6ms，60FPS）的空闲时段（通过 `requestIdleCallback`或 React 调度器模拟获取）
+
+**关键点**：
+
+- 暂停的边界是**完整的 Fiber 节点**，而非节点内部的子操作。
+
+------
+
+**🧠 为什么 Fiber 节点内部 Hook 不可暂停？**
+
+1. **React 的调和过程（Reconciliation）**
+
+- 调和过程中，每个组件对应一个 Fiber 节点。
+- 当调和这个节点时，React 会：
+  - **执行函数组件**（重新调用函数体）
+  - **同步执行所有 Hooks**（`useState`, `useEffect`, etc）
+
+2. **Hooks 是有调用顺序依赖的**
+
+- 每次组件 render 时，Hooks 是依赖于调用顺序来读取/更新状态的（靠 `ReactCurrentDispatcher` 和 Hook 链表）。
+- 如果中途暂停，会打断 Hook 链表的构建 → 状态错乱。
+
 # React 18的并发模式
 
 https://yuanbao.tencent.com/chat/naQivTmsDa/cdec852a-906f-4def-8c0b-1f504cc221e7?projectId=2f13020843e3426ab5f1fc84dfe2aa87
@@ -21,6 +59,10 @@ root.render(<App />);
 - 作用：
   - 启用**可中断渲染**（高优先级更新可打断低优先级渲染）。
   - 但**不会自动启用时间切片或全局优先级调度**（需配合并发特性使用）。
+
+**可中断渲染的具体解释：**
+
+在 React Fiber 中，**高优先级更新可以打断低优先级渲染**，但这里的“打断”并不是指在单个 Fiber 节点内部暂停执行，而是指在 Fiber 树的协调过程中，React 可以**丢弃未完成的低优先级渲染任务**，并立即开始处理高优先级更新。
 
 ------
 
@@ -115,26 +157,31 @@ function SearchResults() {
 
 - React 18 **无论是否开启并发模式，都会用内部的 `scheduler` 模块**。
 - 这个模块有五个优先级（immediate, user-blocking, normal, low, idle）。
+  - `Immediate`：用户输入（最高优先级）。
+  - `UserBlocking`：动画、交互。
+  - `Normal`：普通更新（如数据请求）。
+  - `Low`：非紧急任务（如日志记录）。
+  - `Idle`：空闲时执行。
 - 例如你使用 `startTransition`，React 会把它调度为较低优先级任务。
 
 ### ❌ 没有真正的“并发能力”
 
 如果你没有使用 `createRoot()`，而是用了 `ReactDOM.render()`（即 legacy 模式）：
 
-- React 会**按优先级“排队执行任务”**，但一旦任务开始执行，**不能中断、暂停或打断它**。
+- React 会**按优先级“排队执行任务”**，但一旦任务开始执行，**不能通过优先级中断、暂停或打断它**。
 - 所以即使低优先级任务排在后面，它一旦开始执行，仍会一次性完成（“同步渲染”），用户依旧会感觉卡顿。
 
 ------
 
 ## 📊 类比：非并发 vs 并发模式的优先级调度能力
 
-| 能力                    | 非并发模式         | 并发模式 (Concurrent Mode) |
-| ----------------------- | ------------------ | -------------------------- |
-| 使用 scheduler 模块     | ✅ 有               | ✅ 有                       |
-| setState 支持优先级分类 | ✅ 有               | ✅ 有                       |
-| startTransition 起作用  | ✅ 起作用但不能中断 | ✅ 起作用且可以中断         |
-| 渲染可被中断（yield）   | ❌ 不支持           | ✅ 支持                     |
-| Suspense 异步边界       | 🚫 降级为同步       | ✅ 异步、流式渲染           |
+| 能力                    | 非并发模式                               | 并发模式 (Concurrent Mode) |
+| ----------------------- | ---------------------------------------- | -------------------------- |
+| 使用 scheduler 模块     | ✅ 有                                     | ✅ 有                       |
+| setState 支持优先级分类 | ✅ 有                                     | ✅ 有                       |
+| startTransition 起作用  | ✅ 起作用但不能中断                       | ✅ 起作用且可以中断         |
+| 渲染可被中断（yield）   | ❌ 不支持，仅有被动暂停（防止浏览器卡死） | ✅ 支持                     |
+| Suspense 异步边界       | 🚫 降级为同步                             | ✅ 异步、流式渲染           |
 
 # React Hook的原理
 
@@ -161,9 +208,30 @@ https://yuanbao.tencent.com/chat/naQivTmsDa/e093df06-72e2-4f39-8050-6ccadbbb0c81
     };
     ```
 
+### 2. 为什么是链表结构
+
+**React 使用链表结构管理 Hook，是为了在多次渲染中维护 Hook 的调用顺序和状态一致性，同时支持不同类型 Hook（useState、useReducer、useEffect 等）的插入与组合。**
+
+**🧠 为什么使用链表而不是数组？**
+
+1. **Hook 的调用顺序必须一致**
+
+- React 函数组件在每次 render 时会重新调用函数体，React 必须能根据“调用顺序”正确地匹配每个 Hook 的状态。
+- React 不能靠名字来区分 `a`、`b`、`c`，只能靠**调用顺序**。
+
+2. **链表可以动态扩展不同 Hook 类型的数据结构**
+
+- useState 和 useEffect 维护的数据结构不一样（一个是 state，一个是 effect queue）
+- 使用链表，可以在节点中存储不同类型 Hook 的数据，同时保持执行顺序。
+
+3. **链表可以避免稀疏数组/索引错乱问题**
+
+- 如果用了数组，那 Hook 的增删改可能会导致索引错乱。
+- 链表结构更适合在运行时构建和遍历，能逐一连接每个 Hook 实例，动态生成和更新。
+
 ------
 
-### 2. **不同 Hook 的具体存储**
+### 3. **不同 Hook 的具体存储**
 
 #### ✅ `useState` / `useReducer`
 
@@ -192,7 +260,7 @@ https://yuanbao.tencent.com/chat/naQivTmsDa/e093df06-72e2-4f39-8050-6ccadbbb0c81
 
 ------
 
-### 3. **Fiber 节点的关键属性**
+### 4. **Fiber 节点的关键属性**
 
 ```
 type Fiber = {
@@ -204,7 +272,7 @@ type Fiber = {
 
 ------
 
-### 4. **你的说法是否正确？**
+### 5. **你的说法是否正确？**
 
 - 部分正确：
   - ✅ `useState`、`useMemo` 的状态确实存储在 `fiber.memoizedState` 的 Hook 链表中。
@@ -214,7 +282,7 @@ type Fiber = {
 
 ------
 
-### 5. **示例流程**
+### 6. **示例流程**
 
 1. 组件首次渲染：
    - 每个 Hook 调用会创建一个 Hook 节点，链接到 `fiber.memoizedState`。
@@ -223,14 +291,14 @@ type Fiber = {
    - React 遍历 `fiber.memoizedState` 链表，复用或更新 Hook。
    - 比较 `deps` 决定是否重新执行 effect。
 
-### 6.**不管组件定义了多少 `useEffect`，`memoizedState` 只会有一个 Effect 对象吗**
+### 7.**不管组件定义了多少 `useEffect`，`memoizedState` 只会有一个 Effect 对象吗**
 
 ❌ 不正确
 
 - 每个 `useEffect` 都会在 `fiber.memoizedState` 链表中创建一个 **独立的 Hook 节点**，每个节点的 `memoizedState` 存储自己的 Effect 对象。
 - 但 React 会将这些 Effect 对象 **额外链接到 `fiber.updateQueue`** 中，形成环形链表供调度使用。
 
-### **7. 为什么这样设计？**
+### **8. 为什么这样设计？**
 
 1. **Hook 独立性**：每个 Hook 的状态（如 `useState` 的 state、`useEffect` 的 deps）需要隔离，避免互相污染。
 2. **批量调度效率**：通过 `updateQueue` 链表，React 可以在提交阶段（commit phase）高效遍历并执行所有 Effect。
@@ -307,9 +375,9 @@ function MyComponent() {
 
 通过合理使用Suspense，你可以显著改善大型React应用的加载体验。
 
-## React HOC 面试介绍
+# React HOC 面试介绍
 
-### 1. 什么是 HOC？
+**1. 什么是 HOC？**
 
 （Higher-Order Component，高阶组件）
 
@@ -317,18 +385,18 @@ function MyComponent() {
 - 它是 React 组件复用逻辑的一种高级技巧，属于“组件组合”的模式。
 - 公式表达：`const EnhancedComponent = higherOrderComponent(WrappedComponent)`
 
-### 2. HOC 的作用
+**2. HOC 的作用**
 
 - 代码复用、抽象状态和逻辑，比如权限控制、数据获取、UI 状态管理、性能优化等。
 - 避免重复代码，提高组件的复用性和维护性。
 
-### 3. HOC 的核心原理
+**3. HOC 的核心原理**
 
 - 接收一个原始组件，返回一个包装组件。
 - 包装组件在渲染时，会渲染原始组件并传入增强后的 props 或状态。
 - 通过闭包和组合，实现增强功能。
 
-### 4. HOC 简单示例
+**4. HOC 简单示例**
 
 ```jsx
 function withLoading(WrappedComponent) {
@@ -341,14 +409,14 @@ function withLoading(WrappedComponent) {
 }
 ```
 
-### 5. HOC 使用场景
+**5. HOC 使用场景**
 
 - 权限校验：包装组件根据权限控制渲染内容。
 - 数据获取：包装组件在挂载时请求数据，传递给原始组件。
 - 事件处理：统一处理某些事件逻辑。
 - 性能优化：例如缓存渲染结果。
 
-### 6. 面试常见问题
+**6. 面试常见问题**
 
 - **HOC 与 Render Props 区别？**
   - HOC 是通过函数接受组件并返回新组件，Render Props 是通过一个函数作为子组件提供渲染内容。
@@ -357,7 +425,7 @@ function withLoading(WrappedComponent) {
 - **HOC 如何传递 refs？**
   - 需要用 `React.forwardRef` 来转发 ref，否则 ref 指向的是包装组件而非被包裹组件。
 
-### 7. HOC 的缺点
+**7. HOC 的缺点**
 
 - 组件树嵌套层级增加（“Wrapper Hell”）。
 - 调试时组件层级复杂。
@@ -485,6 +553,8 @@ React 内部在构建完 Work-in-Progress Fiber 树后，会检查是否存在�
    - 如果没有任何副作用，React 会跳过提交阶段（即不触发 DOM 更新，不调用副作用 hook）。
 
 **在React 18+的并发模式下，协调可能被中断多次，但只有在整个Fiber树的副作用收集完成后才会真正进入提交阶段。提交阶段本身是同步不可中断的，这是React保证UI一致性的关键设计。**
+
+整个 Fiber 树" 指的是 **从当前应用的根节点（Root）开始，包含所有需要更新的组件及其子组件构成的完整树形结构**
 
 # 如果一个回调函数任务很多，有几千行逻辑要执行
 
