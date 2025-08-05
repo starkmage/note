@@ -1074,3 +1074,41 @@ JavaScript 使用 **64 位双精度浮点数（IEEE 754）**，导致：
 
   - `BigInt`不能与 `Number`直接混合运算。
   - 不支持 `Math`对象的方法（如 `Math.sqrt()`）。
+
+# 关于Promise状态很容易搞混
+
+```js
+const a = new Promise((resolve) => resolve('promise'))
+const b = Promise.resolve('then fn').then(value => {
+  // b还没有通过return更新，所以b还是pending
+  console.log({
+    value,
+    b
+  })
+  return value
+})
+
+// Promise.resolve().then()的链式调用需要等待微任务队列处理，因此这个时候同步打印的b还是为 pending。
+console.log({
+  a, b
+})
+
+// 这个时候b链路的then执行完了，b已经是fulfilled了
+Promise.resolve('check b').then(() => {
+  console.log({ b })
+})
+
+setTimeout(() => {
+  console.log({
+    a, b
+  })
+})
+
+/*
+{ a: Promise { 'promise' }, b: Promise { <pending> } }
+{ value: 'then fn', b: Promise { <pending> } }
+{ b: Promise { 'then fn' } }
+{ a: Promise { 'promise' }, b: Promise { 'then fn' } }
+*/
+```
+

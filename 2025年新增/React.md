@@ -40,6 +40,42 @@ Fiber 的增量渲染以**单个 Fiber 节点**为任务分片单位：
 - 每次组件 render 时，Hooks 是依赖于调用顺序来读取/更新状态的（靠 `ReactCurrentDispatcher` 和 Hook 链表）。
 - 如果中途暂停，会打断 Hook 链表的构建 → 状态错乱。
 
+# React Fiber暂停任务后，是怎么知道上次的任务执行到哪里了的
+
+“React 通过 **全局指针 `workInProgress`** 和 **Fiber 节点的链表结构** 记录进度：
+
+1. **遍历机制**：`performUnitOfWork`按 `child → sibling → return(parent)`的顺序处理 Fiber 节点，每次更新 `workInProgress`指针。
+2. **中断时**：`workInProgress`停留在最后一个未完成的节点。
+3. **恢复时**：直接从 `workInProgress`继续遍历，无需重新计算。
+4. **双缓冲保护**：通过 `current`和 `workInProgress`两棵树确保中断不会导致 UI 不一致。”
+
+**如果高优先级任务打断了低优先级渲染，React 如何恢复？**
+
+> “高优先级任务会强制丢弃未完成的 `workInProgress`树，并重新从根节点开始渲染。但通过 `alternate`属性复用之前的 Fiber 节点，避免重复创建对象，保证性能。”
+
+# 通过 alternate属性复用之前的 Fiber 节点，避免重复计算的原理
+
+每个 Fiber 节点都有一个 `alternate`属性，指向 **另一个 Fiber 节点**，形成 **“镜像”关系**：
+
+- **`current`树**：当前已渲染到 DOM 的 Fiber 树（即屏幕上显示的 UI 对应的 Fiber 结构）。
+- **`workInProgress`树**：正在构建的新 Fiber 树（可能未完成，可中断）。
+
+**关键点**：
+
+- `current.alternate === workInProgress`
+- `workInProgress.alternate === current`
+- 两棵树通过 `alternate`互相引用，构成双缓冲。
+
+“`alternate`是 Fiber 双缓冲机制的核心属性，它让 React 能在 `current`（当前 UI）和 `workInProgress`（新构建的树）之间复用 Fiber 节点：
+
+1. **复用逻辑**：更新时优先从 `current.alternate`获取节点，仅更新变化的 `props`或 `state`，避免重新创建对象。
+2. **性能优势**：减少内存分配、保留 Hook 状态、优化 Diff 算法。
+3. **中断恢复**：即使渲染被打断，也能通过 `alternate`找回之前的工作进度。”
+
+**如果组件 `key`变化，`alternate`还生效吗？**
+
+> “不生效。React 通过 `key`和 `type`判断是否复用节点。如果 `key`变化，会销毁旧节点并创建新节点，`alternate`关系也会断开。”
+
 # React 18的并发模式
 
 https://yuanbao.tencent.com/chat/naQivTmsDa/cdec852a-906f-4def-8c0b-1f504cc221e7?projectId=2f13020843e3426ab5f1fc84dfe2aa87
