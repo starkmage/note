@@ -105,3 +105,6 @@ element.style.backgroundColor = 'red'; // ✅ 只触发重绘，不影响布局
   - `classList` 批量切换样式
   - `will-change` 或 transform、opacity 等复合层优化
 
+# html的script的type=module什么作用
+
+`type="module"` 让浏览器原生支持 ES6 模块系统，带来 `import/export`、严格模式、延迟执行、独立作用域等特性。

@@ -2,7 +2,7 @@
 
 https://yuanbao.tencent.com/chat/naQivTmsDa/e8d99773-3712-4504-9710-e55e1f7e6fc1?projectId=2f13020843e3426ab5f1fc84dfe2aa87
 
-# 关于React Fiber任务可暂停的粒度
+## 关于React Fiber任务可暂停的粒度
 
 在 React Fiber 的渲染过程中，**不同 Fiber 节点之间可以暂停**（通过时间切片和优先级调度），但**同一个 Fiber 节点内部的多个 Hook 调用是不可暂停的**。
 
@@ -40,7 +40,7 @@ Fiber 的增量渲染以**单个 Fiber 节点**为任务分片单位：
 - 每次组件 render 时，Hooks 是依赖于调用顺序来读取/更新状态的（靠 `ReactCurrentDispatcher` 和 Hook 链表）。
 - 如果中途暂停，会打断 Hook 链表的构建 → 状态错乱。
 
-# React Fiber暂停任务后，是怎么知道上次的任务执行到哪里了的
+## React Fiber暂停任务后，是怎么知道上次的任务执行到哪里了的
 
 “React 通过 **全局指针 `workInProgress`** 和 **Fiber 节点的链表结构** 记录进度：
 
@@ -49,11 +49,11 @@ Fiber 的增量渲染以**单个 Fiber 节点**为任务分片单位：
 3. **恢复时**：直接从 `workInProgress`继续遍历，无需重新计算。
 4. **双缓冲保护**：通过 `current`和 `workInProgress`两棵树确保中断不会导致 UI 不一致。”
 
-**如果高优先级任务打断了低优先级渲染，React 如何恢复？**
+## **如果高优先级任务打断了低优先级渲染，React 如何恢复？**
 
-> “高优先级任务会强制丢弃未完成的 `workInProgress`树，并重新从根节点开始渲染。但通过 `alternate`属性复用之前的 Fiber 节点，避免重复创建对象，保证性能。”
+高优先级任务会强制丢弃未完成的 `workInProgress`树，并重新从根节点开始渲染。但通过 `alternate`属性复用之前的 Fiber 节点，避免重复创建对象，保证性能
 
-# 通过 alternate属性复用之前的 Fiber 节点，避免重复计算的原理
+## 通过 alternate属性复用之前的 Fiber 节点，避免重复计算的原理
 
 每个 Fiber 节点都有一个 `alternate`属性，指向 **另一个 Fiber 节点**，形成 **“镜像”关系**：
 
@@ -106,7 +106,7 @@ root.render(<App />);
 
 React 18 提供了以下 API 来**手动标记优先级**，实现并发效果：
 
-#### ✅ **`startTransition`**
+✅ **`startTransition`**
 
 标记非紧急更新（如搜索筛选），允许被高优先级操作（如用户输入）打断：
 
@@ -124,7 +124,7 @@ function handleSearch(query) {
 }
 ```
 
-#### ✅ **`useDeferredValue`**
+✅ **`useDeferredValue`**
 
 延迟派生值的更新（如输入框的自动补全）：
 
@@ -175,7 +175,7 @@ function SearchResults() {
 
 `useDeferredValue`的核心优势在于它能让界面保持响应，同时又不完全阻止更新，而是在系统资源允许时自动处理更新。
 
-#### ✅ **`Suspense`**
+✅ **`Suspense`**
 
 配合懒加载或数据获取，实现更流畅的异步渲染：
 
@@ -187,9 +187,9 @@ function SearchResults() {
 
 **不开启并发模式（legacy 模式）时，React 仍然有“优先级调度系统”，但它只用于“调度任务”何时执行，而不是“可中断渲染”**。也就是说，**优先级仍然存在，但调度能力是有限的**。
 
-## 📌 更深入理解（关键点）
+## 3. 📌 更深入理解（关键点）
 
-### ✅ 有调度系统（`scheduler`）
+**✅ 有调度系统（`scheduler`）**
 
 - React 18 **无论是否开启并发模式，都会用内部的 `scheduler` 模块**。
 - 这个模块有五个优先级（immediate, user-blocking, normal, low, idle）。
@@ -200,7 +200,7 @@ function SearchResults() {
   - `Idle`：空闲时执行。
 - 例如你使用 `startTransition`，React 会把它调度为较低优先级任务。
 
-### ❌ 没有真正的“并发能力”
+**❌ 没有真正的“并发能力”**
 
 如果你没有使用 `createRoot()`，而是用了 `ReactDOM.render()`（即 legacy 模式）：
 
@@ -209,7 +209,7 @@ function SearchResults() {
 
 ------
 
-## 📊 类比：非并发 vs 并发模式的优先级调度能力
+**📊 类比：非并发 vs 并发模式的优先级调度能力**
 
 | 能力                    | 非并发模式                               | 并发模式 (Concurrent Mode) |
 | ----------------------- | ---------------------------------------- | -------------------------- |
@@ -269,16 +269,16 @@ https://yuanbao.tencent.com/chat/naQivTmsDa/e093df06-72e2-4f39-8050-6ccadbbb0c81
 
 ### 3. **不同 Hook 的具体存储**
 
-#### ✅ `useState` / `useReducer`
+✅ `useState` / `useReducer`
 
 - **`memoizedState`**：存储当前的状态值（如 `count`）。
 - **`queue`**：存储待处理的更新（`dispatch` 触发的动作）。
 
-#### ✅ `useMemo` / `useCallback`
+✅ `useMemo` / `useCallback`
 
 - **`memoizedState`**：存储缓存的值或函数（如 `[value, deps]`）。
 
-#### ✅ `useEffect` / `useLayoutEffect`
+✅ `useEffect` / `useLayoutEffect`
 
 - `memoizedState`：存储一个 effect 对象，结构如下：
 
@@ -306,42 +306,21 @@ type Fiber = {
 };
 ```
 
-------
-
-### 5. **你的说法是否正确？**
-
-- 部分正确：
-  - ✅ `useState`、`useMemo` 的状态确实存储在 `fiber.memoizedState` 的 Hook 链表中。
-  - ✅ `useEffect` 的 effect 对象也**间接**通过 `memoizedState` 关联（但实际执行时会被收集到 `updateQueue`）。
-- 需要修正：
-  - `useEffect` 的 effect 对象不仅存在于 Hook 节点的 `memoizedState` 中，还会被添加到 Fiber 的 `updateQueue` 链表，以便 React 统一调度。
-
-------
-
-### 6. **示例流程**
-
-1. 组件首次渲染：
-   - 每个 Hook 调用会创建一个 Hook 节点，链接到 `fiber.memoizedState`。
-   - `useEffect` 的 effect 对象会被添加到 `fiber.updateQueue`。
-2. 更新阶段：
-   - React 遍历 `fiber.memoizedState` 链表，复用或更新 Hook。
-   - 比较 `deps` 决定是否重新执行 effect。
-
-### 7.**不管组件定义了多少 `useEffect`，`memoizedState` 只会有一个 Effect 对象吗**
+### 5. **不管组件定义了多少 `useEffect`，`memoizedState` 只会有一个 Effect 对象吗**
 
 ❌ 不正确
 
 - 每个 `useEffect` 都会在 `fiber.memoizedState` 链表中创建一个 **独立的 Hook 节点**，每个节点的 `memoizedState` 存储自己的 Effect 对象。
 - 但 React 会将这些 Effect 对象 **额外链接到 `fiber.updateQueue`** 中，形成环形链表供调度使用。
 
-### **8. 为什么这样设计？**
+### **6. 为什么这样设计？**
 
 1. **Hook 独立性**：每个 Hook 的状态（如 `useState` 的 state、`useEffect` 的 deps）需要隔离，避免互相污染。
 2. **批量调度效率**：通过 `updateQueue` 链表，React 可以在提交阶段（commit phase）高效遍历并执行所有 Effect。
 
 ------
 
-### 总结
+### 7. 总结
 
 - **Hooks 状态**：统一通过 `fiber.memoizedState` 链表管理。
 - **Effect 处理**：额外通过 `fiber.updateQueue` 调度，确保生命周期正确执行。
@@ -583,14 +562,95 @@ React 内部在构建完 Work-in-Progress Fiber 树后，会检查是否存在�
 
 1. **在协调阶段：**
    - React 会遍历整个 Fiber 树，执行组件的 render 函数，构建新的子树结构。
-   - 在构建过程中，每个节点如果发生了变化（比如 DOM 更新、ref 变化、副作用 hook 等），都会被打上一个 effect 标记（如 `Placement`, `Update`, `Deletion` 等）。
+   - 在构建过程中，每个节点如果发生了变化（比如 DOM 更新、ref 变化、副作用 hook 等），都会被打上一个 effectTag 标记（如 `Placement`, `Update`, `Deletion` 等）。
+   - `effectTag`是Fiber 节点的一个属性。
 2. **协调结束后：**
    - 如果根节点 `root.finishedWork` 上有副作用（`root.finishedWork.flags !== NoFlags || root.finishedWork.subtreeFlags !== NoFlags`），则进入提交阶段。
    - 如果没有任何副作用，React 会跳过提交阶段（即不触发 DOM 更新，不调用副作用 hook）。
 
 **在React 18+的并发模式下，协调可能被中断多次，但只有在整个Fiber树的副作用收集完成后才会真正进入提交阶段。提交阶段本身是同步不可中断的，这是React保证UI一致性的关键设计。**
 
-整个 Fiber 树" 指的是 **从当前应用的根节点（Root）开始，包含所有需要更新的组件及其子组件构成的完整树形结构**
+整个 Fiber 树" 指的是 **从当前应用的根节点（Root）开始，包含所有需要更新的组件及其子组件构成的完整树形结构**。
+
+# effectList是什么
+
+ React 的 **Fiber 架构** 中，`effectList`（副作用链表）是一个 **单向链表**，用于在协调阶段（Reconciliation / Render Phase）高效收集需要执行副作用的 Fiber 节点，并在提交阶段（Commit Phase）批量处理这些副作用（如 DOM 操作、生命周期调用等）。
+
+------
+
+**1. `effectList`的作用**
+
+- **减少遍历成本**：直接访问需要更新的节点，无需遍历整棵树。
+- **批量更新**：避免频繁操作 DOM，合并变更以提高性能。
+- **支持并发渲染**：可中断的协调阶段 + 原子化的提交阶段，保证 UI 一致性。
+
+------
+
+**2. `effectList`的结构**
+
+`effectList`是一个 **单向链表**，通过 Fiber 节点的 `nextEffect`指针连接：
+
+```
+// Fiber 节点的简化结构
+const fiber = {
+  tag: 'HostComponent', // 节点类型（组件、DOM 等）
+  effectTag: Placement, // 副作用标记（插入、更新、删除等）
+  nextEffect: null,     // 指向下一个需要处理副作用的 Fiber
+  // ...其他属性（child, sibling, return 等）
+};
+```
+
+ **3.`effectList`的构建过程**
+
+在协调阶段，React 会：
+
+1. **标记副作用**：通过 Diff 算法确定 Fiber 节点的变更，并设置 `effectTag`（如 `Placement`、`Update`）。
+2. **链接副作用节点**：
+   - 如果当前 Fiber 有副作用（`effectTag !== NoEffect`），将其添加到父 Fiber 的 `effectList`。
+   - 通过 `nextEffect`指针形成链表。
+3. **回溯到根节点**：最终，根节点（`HostRoot`）的 `effectList`会包含所有需要处理的副作用节点。
+
+# react协调阶段是递归还是循环
+
+在 React 的 **协调阶段（Reconciliation）**，Fiber 架构使用 **循环（Loop）** 而非传统的递归（Recursion）来处理组件树的更新。这是 React 16+ 引入 Fiber 架构的核心优化之一。
+
+------
+
+**1. 为什么用循环替代递归？**
+
+在 React 15 及之前，协调阶段使用 **递归遍历虚拟 DOM 树**，存在以下问题：
+
+- **不可中断**：递归一旦开始就必须执行完，可能导致主线程长时间阻塞（影响交互响应）。
+- **性能瓶颈**：深层次组件树会导致调用栈过深，可能触发堆栈溢出。
+- **无法增量渲染**：无法拆分任务为小片段以利用浏览器的空闲时间（如 `requestIdleCallback`）。
+
+React 16 引入 **Fiber 架构** 后，改用 **循环 + 链表结构** 的迭代方式，实现了：
+
+✅ **可中断和恢复**：React 可以在浏览器空闲时处理一部分任务，避免阻塞。
+
+✅ **增量渲染**：将任务拆分为多个小单元（Fiber 节点），按优先级调度。
+
+✅ **更好的错误处理**：每个 Fiber 节点可以独立捕获错误（如 `Error Boundaries`）。
+
+**2. Fiber 节点的遍历方式**
+
+- **深度优先遍历（DFS）**，但使用 **循环 + 指针（`child`, `sibling`, `return`）** 替代递归：
+
+  - `child`：指向第一个子 Fiber 节点。
+  - `sibling`：指向下一个兄弟 Fiber 节点。
+  - `return`：指向父节点（用于回溯）。
+
+- **示例遍历顺序**：
+
+  ```
+  A
+  / \
+  B   C
+    / \
+   D   E
+  ```
+
+  遍历顺序：`A → B → C → D → E`（DFS），但通过循环实现。
 
 # 如果一个回调函数任务很多，有几千行逻辑要执行
 
@@ -627,7 +687,7 @@ React 内部在构建完 Work-in-Progress Fiber 树后，会检查是否存在�
 
 # React的事件绑定机制
 
-## 一道题目
+**一道题目：**
 
 ```react
 const App = () => {
@@ -840,7 +900,7 @@ root.render(<App />);
 
 ------
 
-### 🎯 小结图（逻辑流程）
+### **🎯 小结图（逻辑流程）**
 
 ```
 原生事件触发
@@ -989,7 +1049,7 @@ e.nativeEvent.stopPropagation();
 
 ------
 
-### ✅ 小结
+### **✅ 小结**
 
 | 方法                | React 封装方式                                   | 是否影响原生事件            |
 | ------------------- | ------------------------------------------------ | --------------------------- |
