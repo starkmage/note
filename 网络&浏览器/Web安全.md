@@ -172,37 +172,16 @@ form 发起的 POST 请求并不受到 CORS 的限制
 
 https://www.ruanyifeng.com/blog/2019/09/cookie-samesite.html
 
-#### 2.csrf token
+#### 2. CSRF token
 
-**不建议使用CSRF token，因为它最适合使用表单提交的旧应用程序。** 
+简单来说，这个字段就像一个**一次性的密码**，用于证明你发出的 POST 请求是来自**你自己的合法网站**，而不是攻击者伪造的。
 
-**当使用某些古老的模板引擎（例如JSP或Thymeleaf）渲染页面时，可以在表单的隐藏字段中生成每个请求令牌，然后提交内容类型为“ application/x-www-form-urlencoded”的表单。这样每次调用后端都要先发个请求获取令牌，有时候您对后端的请求会加倍。**
+它的工作原理是这样的：
 
-**但是，在现代应用程序中，我们不从服务器端的模板引擎渲染表单，我们必须首先请求获得令牌，然后将其存到localStorage里面，而不是隐藏的表单字段，然后使用fetch或axios之类的客户端把form转为JSON再提交请求，令牌这时候是在header上的，而不是一个form field。对于没有表单提交的现代应用程序，可以使用其他更简单的解决方案，不要再不明就里的用CSRF token了。**
-
-CSRF Token的防护策略分为三个步骤：
-
-**1. 将CSRF Token输出到页面中**
-
-首先，用户打开页面的时候，服务器需要给这个用户生成一个Token，显然在提交时Token不能再放在Cookie中了，否则又会被攻击者冒用。因此，为了安全起见Token最好还是存在服务器的Session中。
-
-之后在每次页面加载时，使用JS遍历整个DOM树，对于DOM中所有的a和form标签后加入Token。这样可以解决大部分的请求，但是对于在页面加载之后动态生成的HTML代码，这种方法就没有作用，还需要程序员在编码时手动添加Token。
-
-**2. 页面提交的请求携带这个Token**
-
-对于GET请求，Token将附在请求地址之后，这样URL 就变成 [http://url?csrftoken=tokenvalue。](http://url/?csrftoken=tokenvalue。) 而对于 POST 请求来说，要在 form 的最后加上：
-
-```html
-<input type=”hidden” name=”csrftoken” value=”tokenvalue”/>
-```
-
-这样，就把Token以参数的形式加入请求了。
-
-**3. 服务器验证Token是否正确**。
-
-此方法的实现比较复杂，需要给每一个页面都写入Token（前端无法使用纯静态页面），每一个Form及Ajax请求都携带这个Token，后端对每一个接口都进行校验，并保证页面Token及请求Token一致。
-
-这就使得这个防护策略不能在通用的拦截上统一拦截处理，而需要每一个页面和接口都添加对应的输出和校验。这种方法工作量巨大，且有可能遗漏。
+1. **生成**：当你加载一个页面时，服务器会生成一个唯一的、无法预测的随机字符串（即这个 `_csrf` 值），并将它存储在你的**会话（Session）**中。
+2. **嵌入**：服务器将这个 `_csrf` 值嵌入到页面中，通常放在一个隐藏的表单字段或者 meta 标签里。
+3. **提交**：当你提交 POST 请求时，前端代码会从页面中读取这个 `_csrf` 值，并把它作为 payload 的一个字段（也就是你看到的 `_csrf`）发送给服务器。
+4. **验证**：服务器收到请求后，会对比请求中带的 `_csrf` 值是否和它在你的会话中存储的值一致。如果一致，就认为这是一个合法的请求，并继续处理；如果不一致，就拒绝这个请求，因为它很可能是来自一个非法的来源。
 
 #### 3. 双重cookie
 
@@ -225,3 +204,20 @@ CSRF Token的防护策略分为三个步骤：
 https://tech.meituan.com/2018/10/11/fe-security-csrf.html
 
 https://danielw.cn/web-security-xss-csrf-cn
+
+# 内容安全策略（CSP - Content Security Policy）
+
+**CSP 解决的问题**： CSP 是一种安全机制，旨在**防止跨站脚本攻击（XSS）**和其他代码注入攻击。它通过让开发者明确地告诉浏览器，哪些外部资源（如脚本、样式、图片、字体）是可信的，来限制浏览器可以加载和执行的资源。
+
+- **定义**：CSP 是一种 HTTP 响应头，它通过白名单的方式，控制浏览器可以加载和执行的资源来源，从而有效防御 XSS 攻击。
+- **工作原理**：
+  - 开发者在 HTTP 响应头中添加 `Content-Security-Policy` 字段。
+  - 该字段包含一系列指令，例如 `script-src`, `style-src`, `img-src` 等，每个指令后面跟着一个或多个合法的来源。
+  - 当浏览器收到这个头信息时，它会严格按照策略执行。如果一个脚本源不在白名单中，浏览器会拒绝加载和执行它。
+- **常用指令示例**：
+  - `Content-Security-Policy: default-src 'self'`：这是最基本的策略，只允许从当前域名加载所有资源。
+  - `Content-Security-Policy: script-src 'self' https://trusted-cdn.com`：只允许执行来自当前域名和 `https://trusted-cdn.com` 的脚本。
+  - `Content-Security-Policy: object-src 'none'`：禁止加载任何插件（如 Flash）。
+- **如何保护 Web 应用**：
+  - 通过设置 CSP，可以阻止恶意脚本的注入和执行，即使攻击者成功找到了 XSS 漏洞，也无法加载外部恶意脚本。
+  - CSP 还有报告功能，可以配置浏览器将违规报告发送到指定的 URI，帮助开发者发现潜在的攻击行为。

@@ -278,7 +278,7 @@ This mutual exclusion helps maintain a predictable execution model and simplifie
 主线程通过事件循环机制管理执行任务队列：
 
 - **宏任务（Macro Task）**：如 `setTimeout`、`setInterval`、`requestAnimationFrame`、UI 渲染、事件回调。
-- **微任务（Micro Task）**：如 `Promise.then`、`MutationObserver`、queueMicrotask。
+- **微任务（Micro Task）**：如 `Promise.then`、`MutationObserver`、`queueMicrotask`。
 
 ### 2. 其他线程配合
 
@@ -458,9 +458,9 @@ Web Worker 允许你在主线程之外运行 JavaScript 脚本，即 **在后台
 ✅ 特点：
 
 - 只能与主线程通过 `postMessage` 通信（消息传递方式）
-- 没有 DOM 访问权限
+- **没有 DOM 访问权限**
 - 适合进行 CPU 密集型任务，如大计算、解析等
-- 生命周期随页面走（页面关闭就结束）
+- **生命周期随页面走（页面关闭就结束）**
 
 ✅ 示例：
 
@@ -1112,3 +1112,87 @@ setTimeout(() => {
 */
 ```
 
+# Number和parseFloat的区别
+
+| 特性           | `Number(str)`          | `parseFloat(str)`          |
+| -------------- | ---------------------- | -------------------------- |
+| **转换方式**   | 严格，尝试**整体**转换 | 宽松，从头开始**解析**     |
+| **遇到非数字** | 返回 `NaN`             | 停止解析，返回已解析的部分 |
+| **空字符串**   | 返回 `0`               | 返回 `NaN`                 |
+
+# 怎么在全局获取promise的错误
+
+首先要明确，我们全局捕获的不是所有 Promise 错误，而是那些**未被处理（Unhandled）**的。
+
+一个 Promise Rejection 如果**没有**被 `.catch()` 方法、`then()` 的第二个参数或者 `try...catch` (在 `async/await` 语法中) 捕获，它就成了一个 “Unhandled Promise Rejection”。
+
+- **已处理的 Rejection (不会被全局捕获)**：
+
+  ```js
+  Promise.reject('出错了').catch(error => {
+    console.log('在这里局部处理了错误:', error);
+  });
+  
+  async function handled() {
+    try {
+      await Promise.reject('出错了');
+    } catch (error) {
+      console.log('在这里局部处理了错误:', error);
+    }
+  }
+  ```
+
+- **未处理的 Rejection (会被全局捕获)**：
+
+  ```js
+  Promise.reject('这个错误没有被处理');
+  
+  async function unhandled() {
+    // 函数返回的 Promise 会被 reject，但没有地方 catch
+    await Promise.reject('这个错误也没有被处理');
+  }
+  unhandled();
+  ```
+
+在浏览器里，你可以通过监听 `window` 对象上的 `unhandledrejection` 事件来全局捕获。
+
+- **事件名称**：`unhandledrejection`
+- **监听对象**：`window`
+
+**代码实现：**
+
+```json
+window.addEventListener('unhandledrejection', (event) => {
+  // event 是一个 PromiseRejectionEvent 对象
+  console.log('捕获到未处理的 Promise Rejection 事件:', event);
+
+  // event.reason 包含了 rejection 的原因（即 reject() 括号里的内容）
+  // 这通常是一个 Error 对象，也可能是其他类型的值
+  console.error('Rejection 的原因:', event.reason);
+  
+  // event.promise 指向那个被 reject 的 Promise 对象
+  console.log('发生 Rejection 的 Promise:', event.promise);
+
+  // 在这里，你可以进行全局的错误处理
+  // 比如上报到错误监控系统（如 Sentry, DataDog 等）
+  // Sentry.captureException(event.reason);
+  
+  // 或者给用户一个统一的错误提示
+  // showGlobalErrorBanner('抱歉，发生了一个意外的错误。');
+
+  // 阻止浏览器默认的行为（在控制台打印错误）
+  event.preventDefault();
+});
+
+// --- 触发一个未处理的 rejection 来测试 ---
+function test() {
+    Promise.reject(new Error('这是一个测试错误！'));
+}
+
+test();
+```
+
+**关键点**：
+
+- **`event.reason`**：这是最重要的属性，它就是导致 Promise 失败的原因。最佳实践是 `reject(new Error('...'))`，这样 `reason` 就是一个包含堆栈信息的 Error 对象，非常便于调试。
+- **`event.preventDefault()`**：调用此方法可以阻止这个未处理的 Rejection 错误信息在浏览器控制台中显示出来。通常在我们将错误上报到监控系统后，会调用它以保持控制台的干净。
